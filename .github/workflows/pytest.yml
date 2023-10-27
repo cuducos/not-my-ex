@@ -1,0 +1,19 @@
+name: pytest
+'on':
+  - push
+  - pull_request
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - uses: snok/install-poetry@v1
+      - run: poetry install
+      - run: poetry run ruff format . tests/ --check
+      - run: poetry run pytest

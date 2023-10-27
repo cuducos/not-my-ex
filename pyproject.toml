@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "not_my_ex"
+version = "0.0.1"
+description = "Tiny CLI to post simultaneously to Mastodon and Bluesky"
+authors = ["Eduardo Cuducos <4732915+cuducos@users.noreply.github.com>"]
+license = "GPL-3"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.9,<3.13"
+backoff = "^2.2.1"
+eld = "^1.0.6"
+httpx = "^0.25.0"
+typer = "^0.9.0"
+
+[tool.poetry.group.dev.dependencies]
+ipdb = "^0.13.13"
+pytest = "^7.4.2"
+pytest-isort = "^3.1.0"
+pytest-ruff = "^0.1.1"
+
+[tool.pytest.ini_options]
+addopts = "--isort --ruff"
+
+[tool.isort]
+profile = "black"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
