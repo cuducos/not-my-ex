@@ -30,5 +30,8 @@ def main(text: str, images: List[str] = []):
         print(client.post(post))
 
 
-if __name__ == "__main__":
+def cli():
     run(main)
+
+if __name__ == "__main__":
+    cli()

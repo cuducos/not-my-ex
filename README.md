@@ -37,7 +37,7 @@ Not setting `NOT_MY_EX_MASTODON_TOKEN` disables Mastodon reposting.
 ```console
 $ poetry install
 $ poetry shell
-$ python -m not_my_ex "Magic, madness, heaven, sin " --images /tmp/1989.gif
+$ not-my-ex "Magic, madness, heaven, sin " --images /tmp/1989.gif
 $ exit
 ```
 
