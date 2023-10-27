@@ -68,21 +68,22 @@ class Bluesky:
             BlueskyError(resp)
         return {"alt": media.alt, "image": resp.json()["blob"]}
 
-    def data(self, text, media):
+    def data(self, post):
         data = {
             "repo": self.did,
             "collection": "app.bsky.feed.post",
             "record": {
                 "$type": "app.bsky.feed.post",
-                "text": text,
+                "text": post.text,
                 "createdAt": datetime.utcnow().isoformat(),
+                "langs": [post.lang],
             },
         }
 
-        if matches := URL.findall(text):
+        if matches := URL.findall(post.text):
             data["record"]["facets"] = []
             start = 0
-            source = text.encode()
+            source = post.text.encode()
             for url, *_ in matches:
                 target = url.encode()
                 start = source.find(target, start)
@@ -100,8 +101,8 @@ class Bluesky:
                 )
                 start = end
 
-        if media:
-            embed = [self.upload(media) for media in media]
+        if post.media:
+            embed = [self.upload(media) for media in post.media]
             data["record"]["embed"] = {
                 "$type": "app.bsky.embed.images",
                 "images": embed,
@@ -114,8 +115,7 @@ class Bluesky:
         return f"https://bsky.app/profile/{self.handle}/post/{post_id}"
 
     def post(self, post):
-        data = self.data(post.text, post.media)
-        resp = self.xrpc("com.atproto.repo.createRecord", json=data)
+        resp = self.xrpc("com.atproto.repo.createRecord", json=self.data(post))
         if resp.status_code != 200:
             raise BlueskyError(resp)
 

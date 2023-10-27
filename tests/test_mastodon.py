@@ -27,13 +27,13 @@ def test_mastodon_client_post():
         mock.return_value.status_code = 200
         mock.return_value.json.return_value = {"url": "https://tech.lgbt/@cuducos/42"}
         mastodon = Mastodon()
-        post = Post("Hello")
+        post = Post("Hello world, the answer is 42")
 
         assert mastodon.post(post) == "https://tech.lgbt/@cuducos/42"
         mock.assert_called_once_with(
             f"{settings.MASTODON_INSTANCE}/api/v1/statuses",
             headers={"Authorization": "Bearer 40two"},
-            json={"status": post.text},
+            json={"status": "Hello world, the answer is 42", "language": "en"},
         )
 
 
@@ -82,11 +82,18 @@ def test_mastodon_client_post_with_media():
                 "url": "https://tech.lgbt/@cuducos/42"
             }
             mastodon = Mastodon()
-            post = Post("Hello", (Media(b"42", "image/png", "my alt text"),))
+            post = Post(
+                "Hello world, the answer is 42",
+                (Media(b"42", "image/png", "my alt text"),),
+            )
 
             assert mastodon.post(post) == "https://tech.lgbt/@cuducos/42"
             mock.assert_called_once_with(
                 f"{settings.MASTODON_INSTANCE}/api/v1/statuses",
                 headers={"Authorization": "Bearer 40two"},
-                json={"status": post.text, "media_ids": [42]},
+                json={
+                    "status": "Hello world, the answer is 42",
+                    "language": "en",
+                    "media_ids": [42],
+                },
             )

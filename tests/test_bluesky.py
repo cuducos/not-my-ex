@@ -1,4 +1,4 @@
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 from pytest import raises
 
@@ -46,6 +46,24 @@ def test_bsky_client_gets_a_jwt_token_and_did():
         assert bsky.handle == "cuducos"
 
 
+def test_bsky_client_post_data():
+    with patch("not_my_ex.bluesky.post"):
+        bsky = Bluesky()
+
+    bsky.did = "42"
+    data = bsky.data(Post("hello world, the answer is 42"))
+    assert data == {
+        "repo": "42",
+        "collection": "app.bsky.feed.post",
+        "record": {
+            "$type": "app.bsky.feed.post",
+            "text": "hello world, the answer is 42",
+            "createdAt": ANY,
+            "langs": ["en"],
+        },
+    }
+
+
 def test_bsky_client_post():
     with patch("not_my_ex.bluesky.post"):
         bsky = Bluesky()
@@ -80,7 +98,7 @@ def test_bsky_client_post_data_includes_urls_in_facets():
         bsky = Bluesky()
 
     text = "✨ example mentioning @atproto.com to share the URL 👨‍❤️‍👨 https://en.wikipedia.org/wiki/CBOR."
-    data = bsky.data(text, None)
+    data = bsky.data(Post(text))
     assert data["record"]["facets"] == [
         {
             "index": {"byteStart": 74, "byteEnd": 108},
@@ -104,7 +122,7 @@ def test_bsky_client_post_data_includes_images_blobs():
     with patch("not_my_ex.bluesky.post") as mock:
         mock.return_value.status_code = 200
         mock.return_value.json.return_value = {"blob": "42"}
-        data = bsky.data("hi", (Media(b"42", "image/png", "my alt text"),))
+        data = bsky.data(Post("hi", (Media(b"42", "image/png", "my alt text"),)))
         mock.assert_any_call(
             f"{settings.BSKY_AGENT}/xrpc/com.atproto.repo.uploadBlob",
             headers={

@@ -23,15 +23,33 @@ def media_from(path):
     return Media.from_img(path, alt=alt)
 
 
+def check_language(post):
+    answer = input(f"Is the post language {post.lang}? [y/n] ")
+    if answer.lower() == "y":
+        return
+
+    lang = None
+    while not lang:
+        lang = input("Enter the language (2-letter ISO 639-1 code): ")
+        if lang.isalpha() and len(lang) == 2:
+            break
+
+        lang = None
+
+    post.lang = lang
+
+
 def main(text: str, images: List[str] = []):
     images = tuple(media_from(path) for path in images)
     post = Post(text, images or None)
+    check_language(post)
     for client in clients():
         print(client.post(post))
 
 
 def cli():
     run(main)
+
 
 if __name__ == "__main__":
     cli()

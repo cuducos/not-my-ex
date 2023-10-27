@@ -64,7 +64,7 @@ class Mastodon:
         return media_id
 
     def post(self, status):
-        data = {"status": status.text}
+        data = {"status": status.text, "language": status.lang}
         if status.media:
             data["media_ids"] = [self.upload(media) for media in status.media]
 
