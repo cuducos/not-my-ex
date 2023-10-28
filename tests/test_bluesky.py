@@ -3,7 +3,8 @@ from unittest.mock import ANY, AsyncMock, Mock, patch
 from pytest import mark, raises
 
 from not_my_ex import settings
-from not_my_ex.bluesky import Bluesky, BlueskyCredentialsNotFoundError, BlueskyError
+from not_my_ex.bluesky import Bluesky, BlueskyCredentialsNotFoundError
+from not_my_ex.client import ClientError
 from not_my_ex.posts import Media, Post
 
 
@@ -41,7 +42,7 @@ async def test_bluesky_client_raises_error_for_invalid_credentials():
     response.json.return_value = {"error": "SomeError", "message": "Oops"}
     client.post.return_value = response
     bluesky = Bluesky(client)
-    with raises(BlueskyError):
+    with raises(ClientError):
         await bluesky.auth()
 
 
@@ -109,7 +110,7 @@ async def test_bluesky_client_post_raises_error_from_server():
     client.post.return_value = response
     bluesky = Bluesky(client)
     post = Post("Hello")
-    with raises(BlueskyError):
+    with raises(ClientError):
         await bluesky.post(post)
 
 

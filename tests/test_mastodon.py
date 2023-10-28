@@ -3,7 +3,8 @@ from unittest.mock import ANY, AsyncMock, Mock, patch
 from pytest import mark, raises
 
 from not_my_ex import settings
-from not_my_ex.mastodon import Mastodon, MastodonCredentialsNotFoundError, MastodonError
+from not_my_ex.client import ClientError
+from not_my_ex.mastodon import Mastodon, MastodonCredentialsNotFoundError
 from not_my_ex.posts import Media, Post
 
 
@@ -20,7 +21,7 @@ async def test_mastodon_client_post_raises_error_from_server():
     response.json.return_value = {"error": "oops"}
     client.post.return_value = response
     post = Post("Hello")
-    with raises(MastodonError):
+    with raises(ClientError):
         await Mastodon(client).post(post)
 
 
@@ -51,7 +52,7 @@ async def test_mastodon_client_upload():
     media = Media(b"42", "image/png", "desc")
 
     resp = await mastodon.upload(media)
-    assert resp == 42
+    assert resp == "42"
     client.post.assert_called_once_with(
         f"{settings.MASTODON_INSTANCE}/api/v2/media",
         headers={"Authorization": "Bearer 40two"},
@@ -72,7 +73,7 @@ async def test_mastodon_client_upload_with_post_processing():
     client.get.side_effect = (processing, ok)
     mastodon = Mastodon(client)
     media = Media(b"42", "image/png", "desc")
-    assert await mastodon.upload(media) == 42
+    assert await mastodon.upload(media) == "42"
     assert 2 == client.get.call_count
 
 

@@ -23,5 +23,6 @@ def pytest_configure(config):
 def image():
     with NamedTemporaryFile(suffix=".png") as tmp:
         content = b64decode(ONE_PIXEL_IMAGE)
-        Path(tmp.name).write_bytes(content)
-        yield (tmp.name, content)
+        path = Path(tmp.name)
+        path.write_bytes(content)
+        yield (path, content)

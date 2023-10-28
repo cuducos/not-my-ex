@@ -45,7 +45,7 @@ You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --im
 
 ## Contributing
 
-The tests include [Ruff](https://docs.astral.sh/ruff/) and [`isort`](https://pycqa.github.io/isort/):
+The tests include [Ruff](https://docs.astral.sh/ruff/), [Mypy](https://www.mypy-lang.org/) and [`isort`](https://pycqa.github.io/isort/):
 
 ```console
 $ poetry run ruff format . tests/
