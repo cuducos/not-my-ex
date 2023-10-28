@@ -1,5 +1,4 @@
 from asyncio import gather, get_event_loop
-from pathlib import Path
 from sys import stderr
 from typing import List
 
@@ -15,13 +14,9 @@ from not_my_ex.settings import BLUESKY, CLIENTS_AVAILABLE, MASTODON
 CLIENTS = {BLUESKY: Bluesky, MASTODON: Mastodon}
 
 
-def media_from(path: str) -> Media:
-    pth = Path(path)
-    if not pth.exists():
-        raise FileNotFoundError(pth)
-
-    alt = input(f"Enter an alt text for {pth.name}: ")
-    return Media.from_img(pth, alt=alt)
+async def media_from(path: str) -> Media:
+    alt = input(f"Enter an alt text for {path}: ")
+    return await Media.from_img(path, alt=alt)
 
 
 def check_language(post: Post) -> None:
@@ -57,7 +52,8 @@ async def post_and_print_url(key: str, http: AsyncClient, post: Post) -> None:
 
 
 async def main(text: str, images: List[str] = []) -> None:
-    imgs = tuple(media_from(path) for path in images)
+    load = tuple(media_from(path) for path in images)
+    imgs = await gather(*load)
     post = Post(text, imgs or None)
     check_language(post)
     async with AsyncClient() as http:

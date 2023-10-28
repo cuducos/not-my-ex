@@ -1,8 +1,8 @@
 from dataclasses import dataclass
 from mimetypes import guess_type
-from pathlib import Path
 from typing import Iterable, Optional
 
+from aiofiles import open, os
 from eld import LanguageDetector  # type: ignore
 
 from not_my_ex.settings import LIMIT
@@ -19,11 +19,18 @@ class Media:
     alt: str
 
     @classmethod
-    def from_img(cls, img: Path, alt: str) -> "Media":
+    async def from_img(cls, img: str, alt: str) -> "Media":
+        if not await os.path.exists(img):
+            raise ValueError(f"File {img} does not exist")
+
         mime, *_ = guess_type(img)
         if not isinstance(mime, str):
             raise ValueError(f"Could not guess mime type for {img}")
-        return cls(img.read_bytes(), mime, alt)
+
+        async with open(img, "rb") as handler:
+            contents = await handler.read()
+
+        return cls(contents, mime, alt)
 
 
 @dataclass

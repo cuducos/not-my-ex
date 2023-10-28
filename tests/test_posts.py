@@ -1,4 +1,4 @@
-from pytest import raises
+from pytest import mark, raises
 
 from not_my_ex.posts import Media, Post, PostTooLongError
 
@@ -10,9 +10,11 @@ def test_post():
     assert "en" == post.lang
 
 
-def test_post_with_media(image):
+@mark.asyncio
+async def test_post_with_media(image):
     img, *_ = image
-    post = Post("forty-two", media=(Media.from_img(img, "one pixel"),))
+    media = await Media.from_img(img, "one pixel")
+    post = Post("forty-two", media=(media,))
     assert 1 == len(post.media)
 
 
