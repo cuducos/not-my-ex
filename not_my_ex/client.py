@@ -41,3 +41,9 @@ class Client(ABC):
     @abstractmethod
     async def post(self, post: Post) -> str:
         pass
+
+    @classmethod
+    async def authenticated(cls, http_client) -> "Client":
+        client = cls(http_client)
+        await client.auth()
+        return client

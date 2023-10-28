@@ -24,8 +24,7 @@ async def test_bluesky_client_uses_the_correct_credentials():
         "handle": "cuducos",
     }
     client.post.return_value = response
-    bluesky = Bluesky(client)
-    await bluesky.auth()
+    await Bluesky.authenticated(client)
     client.post.assert_called_once_with(
         f"{settings.BSKY_AGENT}/xrpc/com.atproto.server.createSession",
         json={
@@ -41,9 +40,8 @@ async def test_bluesky_client_raises_error_for_invalid_credentials():
     response.status_code = 401
     response.json.return_value = {"error": "SomeError", "message": "Oops"}
     client.post.return_value = response
-    bluesky = Bluesky(client)
     with raises(ClientError):
-        await bluesky.auth()
+        await Bluesky.authenticated(client)
 
 
 @mark.asyncio
@@ -56,8 +54,7 @@ async def test_bluesky_client_gets_a_jwt_token_and_did():
         "handle": "cuducos",
     }
     client.post.return_value = response
-    bluesky = Bluesky(client)
-    await bluesky.auth()
+    bluesky = await Bluesky.authenticated(client)
     assert bluesky.token == "a very long string"
     assert bluesky.did == "42"
     assert bluesky.handle == "cuducos"

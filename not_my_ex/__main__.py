@@ -37,12 +37,12 @@ def check_language(post: Post) -> None:
 
 async def post_and_print_url(key: str, http: AsyncClient, post: Post) -> None:
     try:
-        client = CLIENTS[key](http)
+        cls = CLIENTS[key]
     except KeyError:
         raise ValueError(f"Unknown client {key}, options are: {', '.join(CLIENTS)}")
 
     try:
-        await client.auth()
+        client = await cls.authenticated(http)
         url = await client.post(post)
     except ClientError as exc:
         print(str(exc), file=stderr)
