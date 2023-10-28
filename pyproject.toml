@@ -16,6 +16,7 @@ typer = "^0.9.0"
 [tool.poetry.group.dev.dependencies]
 ipdb = "^0.13.13"
 pytest = "^7.4.2"
+pytest-asyncio = "^0.21.1"
 pytest-isort = "^3.1.0"
 pytest-ruff = "^0.1.1"
 

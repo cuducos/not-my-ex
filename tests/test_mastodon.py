@@ -1,6 +1,6 @@
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import ANY, AsyncMock, Mock, patch
 
-from pytest import raises
+from pytest import mark, raises
 
 from not_my_ex import settings
 from not_my_ex.mastodon import Mastodon, MastodonCredentialsNotFoundError, MastodonError
@@ -10,90 +10,93 @@ from not_my_ex.posts import Media, Post
 def test_mastodon_client_raises_error_when_not_set():
     with patch.object(settings, "CLIENTS_AVAILABLE", new_callable=set):
         with raises(MastodonCredentialsNotFoundError):
-            Mastodon()
+            Mastodon(None)
 
 
-def test_mastodon_client_post_raises_error_from_server():
-    with patch("not_my_ex.mastodon.post") as mock:
-        mock.return_value.status_code = 401
-        mock.return_value.json.return_value = {"error": "oops"}
-        post = Post("Hello")
-        with raises(MastodonError):
-            Mastodon().post(post)
+@mark.asyncio
+async def test_mastodon_client_post_raises_error_from_server():
+    client, response = AsyncMock(), Mock()
+    response.status_code = 401
+    response.json.return_value = {"error": "oops"}
+    client.post.return_value = response
+    post = Post("Hello")
+    with raises(MastodonError):
+        await Mastodon(client).post(post)
 
 
-def test_mastodon_client_post():
-    with patch("not_my_ex.mastodon.post") as mock:
-        mock.return_value.status_code = 200
-        mock.return_value.json.return_value = {"url": "https://tech.lgbt/@cuducos/42"}
-        mastodon = Mastodon()
-        post = Post("Hello world, the answer is 42")
+@mark.asyncio
+async def test_mastodon_client_post():
+    client, response = AsyncMock(), Mock()
+    response.status_code = 200
+    response.json.return_value = {"url": "https://tech.lgbt/@cuducos/42"}
+    client.post.return_value = response
+    mastodon = Mastodon(client)
+    post = Post("Hello world, the answer is 42")
 
-        assert mastodon.post(post) == "https://tech.lgbt/@cuducos/42"
-        mock.assert_called_once_with(
+    assert await mastodon.post(post) == "https://tech.lgbt/@cuducos/42"
+    client.post.assert_called_once_with(
+        f"{settings.MASTODON_INSTANCE}/api/v1/statuses",
+        headers={"Authorization": "Bearer 40two"},
+        json={"status": "Hello world, the answer is 42", "language": "en"},
+    )
+
+
+@mark.asyncio
+async def test_mastodon_client_upload():
+    client, response = AsyncMock(), Mock()
+    response.status_code = 200
+    response.json.return_value = {"id": 42}
+    client.post.return_value = response
+    mastodon = Mastodon(client)
+    media = Media(b"42", "image/png", "desc")
+
+    resp = await mastodon.upload(media)
+    assert resp == 42
+    client.post.assert_called_once_with(
+        f"{settings.MASTODON_INSTANCE}/api/v2/media",
+        headers={"Authorization": "Bearer 40two"},
+        data={"description": "desc"},
+        files={"file": ("image.png", ANY, "image/png")},
+    )
+
+
+@mark.asyncio
+async def test_mastodon_client_upload_with_post_processing():
+    client, response = AsyncMock(), Mock()
+    response.status_code = 202
+    response.json.return_value = {"id": 42}
+    processing, ok = Mock(), Mock()
+    processing.status_code = 206
+    ok.status_code = 200
+    client.post.return_value = response
+    client.get.side_effect = (processing, ok)
+    mastodon = Mastodon(client)
+    media = Media(b"42", "image/png", "desc")
+    assert await mastodon.upload(media) == 42
+    assert 2 == client.get.call_count
+
+
+@mark.asyncio
+async def test_mastodon_client_post_with_media():
+    with patch.object(Mastodon, "upload", new_callable=AsyncMock) as upload:
+        upload.return_value = 42
+        client, response = AsyncMock(), Mock()
+        response.status_code = 200
+        response.json.return_value = {"url": "https://tech.lgbt/@cuducos/42"}
+        client.post.return_value = response
+        mastodon = Mastodon(client)
+        post = Post(
+            "Hello world, the answer is 42",
+            (Media(b"42", "image/png", "my alt text"),),
+        )
+
+        assert await mastodon.post(post) == "https://tech.lgbt/@cuducos/42"
+        client.post.assert_called_once_with(
             f"{settings.MASTODON_INSTANCE}/api/v1/statuses",
             headers={"Authorization": "Bearer 40two"},
-            json={"status": "Hello world, the answer is 42", "language": "en"},
+            json={
+                "status": "Hello world, the answer is 42",
+                "language": "en",
+                "media_ids": [42],
+            },
         )
-
-
-def test_mastodon_client_upload():
-    mastodon = Mastodon()
-    media = Media(b"42", "image/png", "desc")
-
-    with patch("not_my_ex.mastodon.post") as mock:
-        mock.return_value.status_code = 200
-        mock.return_value.json.return_value = {"id": 42}
-        resp = mastodon.upload(media)
-
-        assert resp == 42
-        mock.assert_called_once_with(
-            f"{settings.MASTODON_INSTANCE}/api/v2/media",
-            headers={"Authorization": "Bearer 40two"},
-            data={"description": "desc"},
-            files={"file": ("image.png", ANY, "image/png")},
-        )
-
-
-def test_mastodon_client_upload_with_post_processing():
-    mastodon = Mastodon()
-    media = Media(b"42", "image/png", "desc")
-
-    with patch("not_my_ex.mastodon.post") as post:
-        post.return_value.status_code = 202
-        post.return_value.json.return_value = {"id": 42}
-
-        with patch("not_my_ex.mastodon.get") as get:
-            processing, ok = Mock(), Mock()
-            processing.status_code = 206
-            ok.status_code = 200
-            get.side_effect = (processing, processing, ok)
-
-            assert mastodon.upload(media) == 42
-            assert 3 == get.call_count
-
-
-def test_mastodon_client_post_with_media():
-    with patch.object(Mastodon, "upload") as upload:
-        upload.return_value = 42
-        with patch("not_my_ex.mastodon.post") as mock:
-            mock.return_value.status_code = 200
-            mock.return_value.json.return_value = {
-                "url": "https://tech.lgbt/@cuducos/42"
-            }
-            mastodon = Mastodon()
-            post = Post(
-                "Hello world, the answer is 42",
-                (Media(b"42", "image/png", "my alt text"),),
-            )
-
-            assert mastodon.post(post) == "https://tech.lgbt/@cuducos/42"
-            mock.assert_called_once_with(
-                f"{settings.MASTODON_INSTANCE}/api/v1/statuses",
-                headers={"Authorization": "Bearer 40two"},
-                json={
-                    "status": "Hello world, the answer is 42",
-                    "language": "en",
-                    "media_ids": [42],
-                },
-            )

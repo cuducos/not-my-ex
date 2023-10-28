@@ -1,8 +1,9 @@
+from asyncio import gather
 from datetime import datetime
 from re import compile
 
 from backoff import expo, on_exception
-from httpx import ReadTimeout, post
+from httpx import ReadTimeout
 
 from not_my_ex import settings
 
@@ -27,48 +28,55 @@ class BlueskyError(Exception):
 
 
 class Bluesky:
-    def __init__(self):
+    def __init__(self, client):
         if settings.BLUESKY not in settings.CLIENTS_AVAILABLE:
             raise BlueskyCredentialsNotFoundError(
                 "NOT_MY_EX_BSKY_EMAIL and/or NOT_MY_EX_BSKY_PASSWORD "
                 "environment variables not set"
             )
 
-        credentials = {
+        self.client = client
+        self.credentials = {
             "identifier": settings.BSKY_EMAIL,
             "password": settings.BSKY_PASSWORD,
         }
-        resp = post(
-            f"{settings.BSKY_AGENT}/xrpc/com.atproto.server.createSession",
-            json=credentials,
-        )
+        self.token, self.did, self.handle = None, None, None
 
-        if resp.status_code == 401:
+    async def auth(self):
+        resp = await self.client.post(
+            f"{settings.BSKY_AGENT}/xrpc/com.atproto.server.createSession",
+            json=self.credentials,
+        )
+        if resp.status_code != 200:
             raise BlueskyError(resp)
 
-        resp.raise_for_status()
         data = resp.json()
-        self.token = data["accessJwt"]
-        self.did = data["did"]
-        self.handle = data["handle"]
+        self.token, self.did, self.handle = (
+            data["accessJwt"],
+            data["did"],
+            data["handle"],
+        )
 
     @on_exception(expo, ReadTimeout, max_tries=7)
-    def xrpc(self, resource, **kwargs):
+    async def xrpc(self, resource, **kwargs):
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"Bearer {self.token}"
-        return post(f"{settings.BSKY_AGENT}/xrpc/{resource}", headers=headers, **kwargs)
+        url = f"{settings.BSKY_AGENT}/xrpc/{resource}"
+        return await self.client.post(url, headers=headers, **kwargs)
 
-    def upload(self, media):
-        resp = self.xrpc(
+    async def upload(self, media):
+        resp = await self.xrpc(
             "com.atproto.repo.uploadBlob",
             headers={"Content-type": media.mime},
             data=media.content,
         )
         if resp.status_code != 200:
             BlueskyError(resp)
-        return {"alt": media.alt, "image": resp.json()["blob"]}
 
-    def data(self, post):
+        data = resp.json()
+        return {"alt": media.alt, "image": data["blob"]}
+
+    async def data(self, post):
         data = {
             "repo": self.did,
             "collection": "app.bsky.feed.post",
@@ -102,7 +110,8 @@ class Bluesky:
                 start = end
 
         if post.media:
-            embed = [self.upload(media) for media in post.media]
+            uploads = tuple(self.upload(media) for media in post.media)
+            embed = await gather(*uploads)
             data["record"]["embed"] = {
                 "$type": "app.bsky.embed.images",
                 "images": embed,
@@ -110,13 +119,15 @@ class Bluesky:
 
         return data
 
-    def url_from(self, resp):
-        *_, post_id = resp.json()["uri"].split("/")
+    async def url_from(self, resp):
+        data = resp.json()
+        *_, post_id = data["uri"].split("/")
         return f"https://bsky.app/profile/{self.handle}/post/{post_id}"
 
-    def post(self, post):
-        resp = self.xrpc("com.atproto.repo.createRecord", json=self.data(post))
+    async def post(self, post):
+        data = await self.data(post)
+        resp = await self.xrpc("com.atproto.repo.createRecord", json=data)
         if resp.status_code != 200:
             raise BlueskyError(resp)
 
-        return self.url_from(resp)
+        return await self.url_from(resp)
