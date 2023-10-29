@@ -6,7 +6,8 @@ from httpx import AsyncClient, Response
 
 from not_my_ex import settings
 from not_my_ex.client import Client
-from not_my_ex.posts import Media, Post
+from not_my_ex.media import Media
+from not_my_ex.post import Post
 
 
 class MediaNotReadyError(Exception):

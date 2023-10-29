@@ -5,7 +5,8 @@ from pytest import mark, raises
 from not_my_ex import settings
 from not_my_ex.bluesky import Bluesky, BlueskyCredentialsNotFoundError
 from not_my_ex.client import ClientError
-from not_my_ex.posts import Media, Post
+from not_my_ex.media import Media
+from not_my_ex.post import Post
 
 
 def test_bluesky_client_raises_error_when_not_set():
@@ -139,7 +140,9 @@ async def test_bluesky_client_post_data_includes_images_blobs():
     bluesky = Bluesky(client)
     bluesky.token = "token"
     bluesky.did = "did"
-    data = await bluesky.data(Post("hi", (Media(b"42", "image/png", "my alt text"),)))
+    media = Media("/tmp/42.png", b"42", "image/png", "my alt text")
+    post = Post("hi", (media,))
+    data = await bluesky.data(post)
     client.post.assert_any_call(
         f"{settings.BSKY_AGENT}/xrpc/com.atproto.repo.uploadBlob",
         headers={

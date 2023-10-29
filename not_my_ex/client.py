@@ -3,7 +3,8 @@ from typing import Union
 
 from httpx import Response
 
-from not_my_ex.posts import Media, Post
+from not_my_ex.media import Media
+from not_my_ex.post import Post
 
 
 class ClientError(Exception):

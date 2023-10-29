@@ -5,7 +5,8 @@ from pytest import mark, raises
 from not_my_ex import settings
 from not_my_ex.client import ClientError
 from not_my_ex.mastodon import Mastodon, MastodonCredentialsNotFoundError
-from not_my_ex.posts import Media, Post
+from not_my_ex.media import Media
+from not_my_ex.post import Post
 
 
 def test_mastodon_client_raises_error_when_not_set():
@@ -49,7 +50,7 @@ async def test_mastodon_client_upload():
     response.json.return_value = {"id": 42}
     client.post.return_value = response
     mastodon = Mastodon(client)
-    media = Media(b"42", "image/png", "desc")
+    media = Media("/tmp/42.png", b"42", "image/png", "desc")
 
     resp = await mastodon.upload(media)
     assert resp == "42"
@@ -72,7 +73,7 @@ async def test_mastodon_client_upload_with_post_processing():
     client.post.return_value = response
     client.get.side_effect = (processing, ok)
     mastodon = Mastodon(client)
-    media = Media(b"42", "image/png", "desc")
+    media = Media("/tmp/42.png", b"42", "image/png", "desc")
     assert await mastodon.upload(media) == "42"
     assert 2 == client.get.call_count
 
@@ -88,7 +89,7 @@ async def test_mastodon_client_post_with_media():
         mastodon = Mastodon(client)
         post = Post(
             "Hello world, the answer is 42",
-            (Media(b"42", "image/png", "my alt text"),),
+            (Media("/tmp/42.png", b"42", "image/png", "my alt text"),),
         )
 
         assert await mastodon.post(post) == "https://tech.lgbt/@cuducos/42"

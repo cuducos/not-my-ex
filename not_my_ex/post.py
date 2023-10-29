@@ -1,36 +1,15 @@
 from dataclasses import dataclass
-from mimetypes import guess_type
 from typing import Iterable, Optional
 
-from aiofiles import open, os
 from eld import LanguageDetector  # type: ignore
 
+from not_my_ex.language import Language
+from not_my_ex.media import Media
 from not_my_ex.settings import LIMIT
 
 
 class PostTooLongError(Exception):
     pass
-
-
-@dataclass
-class Media:
-    content: bytes
-    mime: str
-    alt: str
-
-    @classmethod
-    async def from_img(cls, img: str, alt: str) -> "Media":
-        if not await os.path.exists(img):
-            raise ValueError(f"File {img} does not exist")
-
-        mime, *_ = guess_type(img)
-        if not isinstance(mime, str):
-            raise ValueError(f"Could not guess mime type for {img}")
-
-        async with open(img, "rb") as handler:
-            contents = await handler.read()
-
-        return cls(contents, mime, alt)
 
 
 @dataclass
@@ -46,3 +25,12 @@ class Post:
         if not self.lang:
             detector = LanguageDetector()
             self.lang = detector.detect(self.text).language
+
+    def check_language(self):
+        answer = input(f"Is the post language {self.lang}? [y/n] ")
+        if answer.lower() == "y":
+            return
+
+        lang = Language()
+        lang.ask()
+        self.lang = lang.name
