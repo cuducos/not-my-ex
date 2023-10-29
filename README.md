@@ -4,6 +4,15 @@ Tiny CLI to post simultaneously to Mastodon and Bluesky.
 
 <small>Obviously, based on [`cuducos/from-my-ex`](https://github.com/cuducos/from-my-ex).</small>
 
+It supports:
+* Post status updates to both networks with a simple CLI command
+* Posting with images
+* Including alt text for images
+* Setting post language
+
+It does not support:
+* Tagging other users (they would have different IDs and servers in each platform)
+
 ## Getting started
 
 ### Requirements
@@ -11,19 +20,19 @@ Tiny CLI to post simultaneously to Mastodon and Bluesky.
 * Python 3.9 or newer
 * [Poetry](https://python-poetry.org)
 
-### Configuration
+#### Environment variables
 
-#### To repost in [Bluesky](https://bsky.app)
+##### To repost in [Bluesky](https://bsky.app)
 
 | Name | Description | Example | Default value |
 |---|---|---|---|
 | `NOT_MY_EX_BSKY_AGENT` | Bluesky instance | `"https://bsky.social"` | `"https://bsky.social"` |
 | `NOT_MY_EX_BSKY_EMAIL` | Email used in Bluesky | `"cuducos@mailinator.com"` | `None` |
-| `NOT_MY_EX_BSKY_PASSWORD` | Password used in Bluesky | As created in [App Passwords](https://bsky.app/settings/app-passwords) | `None` |
+| `NOT_MY_EX_BSKY_PASSWORD` | Password used in Bluesky | As created in [App Passwords](https://bsky.app/settings/app-passwords). | `None` |
 
 Not setting `NOT_MY_EX_BSKY_EMAIL` **or** `NOT_MY_EX_BSKY_PASSWORD` disables Bluesky reposting.
 
-#### To repost in [Mastodon](https://joinmastodon.org/)
+##### To repost in [Mastodon](https://joinmastodon.org/)
 
 | Name | Description | Example | Default value |
 |---|---|---|---|
