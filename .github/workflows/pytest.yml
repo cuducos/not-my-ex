@@ -15,5 +15,4 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - uses: snok/install-poetry@v1
       - run: poetry install
-      - run: poetry run ruff format . tests/ --check
       - run: poetry run pytest

@@ -57,7 +57,5 @@ You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --im
 The tests include [Ruff](https://docs.astral.sh/ruff/) and [Mypy](https://www.mypy-lang.org/):
 
 ```console
-$ poetry run ruff format . tests/
-$ poetry run ruff . tests/
 $ poetry run pytest
 ```

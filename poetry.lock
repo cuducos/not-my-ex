@@ -590,13 +590,13 @@ pytest = [
 
 [[package]]
 name = "pytest-ruff"
-version = "0.1.1"
+version = "0.2.1"
 description = "pytest plugin to check ruff requirements."
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "pytest_ruff-0.1.1-py3-none-any.whl", hash = "sha256:db33c8d32d730d61d372c1ac4615b1036c47a14c781cbc0ae71811c4cadadc47"},
-    {file = "pytest_ruff-0.1.1.tar.gz", hash = "sha256:f599768ff3834d6b1d6d26b25a030a5b1dcc9cf187239bd9621a7f25f7d8fe46"},
+    {file = "pytest_ruff-0.2.1-py3-none-any.whl", hash = "sha256:f586bbd7978cb5782b673c8e55fa069d83430139931b918bd72232ba3f71eb67"},
+    {file = "pytest_ruff-0.2.1.tar.gz", hash = "sha256:078ad696bfa347b466991ed4f9cc5ec807f5a171d7f06091660d8f16ba03a5dc"},
 ]
 
 [package.dependencies]
@@ -849,4 +849,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9,<3.13"
-content-hash = "6e282e995c96d1a4182eff046a6355ba5d33b137b99ac34f81cec5b97444bdf9"
+content-hash = "6c9ea700e1f0c4b8b8cb64e7b88350c4a11f52cfe5f250c9b76cb3c90ce76de7"
