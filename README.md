@@ -49,11 +49,47 @@ $ pip install not-my-ex
 
 ## Usage
 
+
+### CLI
+
 ```console
 $ not-my-ex "Magic, madness, heaven, sin " --images /tmp/1989.gif
 ```
 
 You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --images swift.gif`).
+
+### API
+
+```python
+from not_my_ex.bluesky import Bluesky
+from not_my_ex.mastodon import Mastodon
+from not_my_ex.media import Media
+from not_my_ex.post import Post
+
+from httpx import AsyncClient
+
+
+async def publish(adapter, http, post):
+    client = await adapter.authenticated(http)
+    await client.post(post)
+
+
+async def main():
+    post = Post(
+        text="Magic, madness, heaven, sin ",
+        media=(
+            Media.from_img("taylor.jpg", alt="Taylor"),
+            Media.from_img("swift.jpg", alt="Swift"),
+        ),
+        lang="en",
+    )
+
+    async with AsyncClient() as http:
+        tasks = tuple(publish(cls, http, post) for cls in (Bluesky, Mastodon))
+        await gather(*tasks)
+```
+
+In `Post`, both `media` and `lang` are optional. In `Media`, `alt` is optional.
 
 ## Contributing
 

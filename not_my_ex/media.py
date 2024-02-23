@@ -13,7 +13,7 @@ class Media:
     alt: Optional[str] = None
 
     @classmethod
-    async def from_img(cls, img: str) -> "Media":
+    async def from_img(cls, img: str, alt: Optional[str] = None) -> "Media":
         if not await os.path.exists(img):
             raise ValueError(f"File {img} does not exist")
 
@@ -24,7 +24,7 @@ class Media:
         async with open(img, "rb") as handler:
             contents = await handler.read()
 
-        return cls(img, contents, mime)
+        return cls(img, contents, mime, alt)
 
     def check_alt_text(self):
         while not self.alt:
