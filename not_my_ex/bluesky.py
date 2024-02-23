@@ -4,6 +4,7 @@ from re import compile
 
 from backoff import expo, on_exception
 from httpx import AsyncClient, ReadTimeout, Response
+from pytz import UTC
 
 from not_my_ex import settings
 from not_my_ex.client import Client
@@ -69,13 +70,14 @@ class Bluesky(Client):
         return {"alt": media.alt, "image": data["blob"]}
 
     async def data(self, post):
+        created_at = datetime.utcnow().replace(microsecond=0, tzinfo=UTC).isoformat()
         data = {
             "repo": self.did,
             "collection": "app.bsky.feed.post",
             "record": {
                 "$type": "app.bsky.feed.post",
                 "text": post.text,
-                "createdAt": datetime.utcnow().isoformat(),
+                "createdAt": created_at,
                 "langs": [post.lang],
             },
         }
