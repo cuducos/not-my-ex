@@ -28,7 +28,8 @@ LIMIT = 300 if BLUESKY in CLIENTS_AVAILABLE else 1024
 
 if not CLIENTS_AVAILABLE:
     raise EnvironmentVariableNotFoundError(
-        "No clients available. Please set at least one of the following environment variables:\n"
+        "No clients available. Please set at least one of the following environment "
+        "variables:\n"
         "- NOT_MY_EX_BSKY_EMAIL and NOT_MY_EX_BSKY_PASSWORD"
         "- NOT_MY_EX_MASTODON_TOKEN"
     )
