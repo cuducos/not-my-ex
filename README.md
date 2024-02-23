@@ -41,13 +41,16 @@ Not setting `NOT_MY_EX_BSKY_EMAIL` **or** `NOT_MY_EX_BSKY_PASSWORD` disables Blu
 
 Not setting `NOT_MY_EX_MASTODON_TOKEN` disables Mastodon reposting.
 
+## Install
+
+```console
+$ pip install not-my-ex
+```
+
 ## Usage
 
 ```console
-$ poetry install
-$ poetry shell
 $ not-my-ex "Magic, madness, heaven, sin " --images /tmp/1989.gif
-$ exit
 ```
 
 You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --images swift.gif`).
@@ -57,5 +60,6 @@ You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --im
 The tests include [Ruff](https://docs.astral.sh/ruff/) and [Mypy](https://www.mypy-lang.org/):
 
 ```console
+$ poetry install
 $ poetry run pytest
 ```
