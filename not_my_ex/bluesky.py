@@ -33,6 +33,7 @@ class Bluesky(Client):
             "password": settings.BSKY_PASSWORD,
         }
         self.token, self.did, self.handle = None, None, None
+        self.is_authenticated = False
         super().__init__(client)
 
     async def auth(self) -> None:
@@ -49,6 +50,7 @@ class Bluesky(Client):
             data["did"],
             data["handle"],
         )
+        self.is_authenticated = True
 
     @on_exception(expo, ReadTimeout, max_tries=7)
     async def xrpc(self, resource: str, **kwargs) -> Response:
@@ -58,6 +60,9 @@ class Bluesky(Client):
         return await self.client.post(url, headers=headers, **kwargs)
 
     async def upload(self, media: Media) -> dict:
+        if not self.is_authenticated:
+            await self.auth()
+
         resp = await self.xrpc(
             "com.atproto.repo.uploadBlob",
             headers={"Content-type": media.mime},
@@ -70,6 +75,9 @@ class Bluesky(Client):
         return {"alt": media.alt, "image": data["blob"]}
 
     async def data(self, post):
+        if not self.is_authenticated:
+            await self.auth()
+
         created_at = datetime.utcnow().replace(microsecond=0, tzinfo=UTC).isoformat()
         data = {
             "repo": self.did,
@@ -119,6 +127,9 @@ class Bluesky(Client):
         return f"https://bsky.app/profile/{self.handle}/post/{post_id}"
 
     async def post(self, post: Post) -> str:
+        if not self.is_authenticated:
+            await self.auth()
+
         data = await self.data(post)
         resp = await self.xrpc("com.atproto.repo.createRecord", json=data)
         if resp.status_code != 200:

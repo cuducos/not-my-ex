@@ -61,32 +61,27 @@ You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --im
 ### API
 
 ```python
+from asyncio import gather
+
+from httpx import AsyncClient
+
 from not_my_ex.bluesky import Bluesky
 from not_my_ex.mastodon import Mastodon
 from not_my_ex.media import Media
 from not_my_ex.post import Post
 
-from httpx import AsyncClient
-
-
-async def publish(adapter, http, post):
-    client = await adapter.authenticated(http)
-    await client.post(post)
-
 
 async def main():
-    post = Post(
-        text="Magic, madness, heaven, sin ",
-        media=(
-            Media.from_img("taylor.jpg", alt="Taylor"),
-            Media.from_img("swift.jpg", alt="Swift"),
-        ),
-        lang="en",
+    media_tasks = tuple(
+        Media.from_img(path, alt=alt)
+        for path, alt in (("taylor.jpg", "Taylor"), ("swift.jpg", "Swift"))
     )
+    media = await gather(*media_tasks)
 
+    post = Post(text="Magic, madness, heaven, sin ", media=media, lang="en")
     async with AsyncClient() as http:
-        tasks = tuple(publish(cls, http, post) for cls in (Bluesky, Mastodon))
-        await gather(*tasks)
+        post_tasks = tuple(cls(http).post(post) for cls in (Bluesky, Mastodon))
+        await gather(*post_tasks)
 ```
 
 In `Post`, both `media` and `lang` are optional. In `Media`, `alt` is optional.

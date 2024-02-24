@@ -27,9 +27,6 @@ class Mastodon(Client):
         self.headers = {"Authorization": f"Bearer {settings.MASTODON_TOKEN}"}
         super().__init__(client)
 
-    async def auth(self) -> None:
-        return
-
     async def request(self, path: str, **kwargs) -> Response:
         return await self.client.post(
             f"{settings.MASTODON_INSTANCE}{path}", headers=self.headers, **kwargs

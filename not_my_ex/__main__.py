@@ -22,9 +22,9 @@ async def post_and_print_url(key: str, http: AsyncClient, post: Post) -> None:
     except KeyError:
         raise ValueError(f"Unknown client {key}, options are: {', '.join(CLIENTS)}")
 
+    client = cls(http)
     try:
-        client = await cls.authenticated(http)
-        url = await client.post(post)
+        url = await cls(http).post(post)
     except ClientError as exc:
         print(str(exc), file=stderr)
         return

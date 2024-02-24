@@ -32,19 +32,9 @@ class Client(ABC):
         raise ClientError(msg)
 
     @abstractmethod
-    async def auth(self) -> None:
-        pass
-
-    @abstractmethod
     async def upload(self, media: Media) -> Union[str, dict]:
         pass
 
     @abstractmethod
     async def post(self, post: Post) -> str:
         pass
-
-    @classmethod
-    async def authenticated(cls, http_client) -> "Client":
-        client = cls(http_client)
-        await client.auth()
-        return client

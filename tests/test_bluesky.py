@@ -1,5 +1,6 @@
 from unittest.mock import ANY, AsyncMock, Mock, patch
 
+from httpx import AsyncClient
 from pytest import mark, raises
 
 from not_my_ex import settings
@@ -9,10 +10,12 @@ from not_my_ex.media import Media
 from not_my_ex.post import Post
 
 
-def test_bluesky_client_raises_error_when_not_set():
+@mark.asyncio
+async def test_bluesky_client_raises_error_when_not_set():
     with patch.object(settings, "CLIENTS_AVAILABLE", new_callable=set):
         with raises(BlueskyCredentialsNotFoundError):
-            Bluesky(None)
+            async with AsyncClient() as client:
+                Bluesky(client)
 
 
 @mark.asyncio
@@ -25,7 +28,7 @@ async def test_bluesky_client_uses_the_correct_credentials():
         "handle": "cuducos",
     }
     client.post.return_value = response
-    await Bluesky.authenticated(client)
+    await Bluesky(client).auth()
     client.post.assert_called_once_with(
         f"{settings.BSKY_AGENT}/xrpc/com.atproto.server.createSession",
         json={
@@ -41,8 +44,8 @@ async def test_bluesky_client_raises_error_for_invalid_credentials():
     response.status_code = 401
     response.json.return_value = {"error": "SomeError", "message": "Oops"}
     client.post.return_value = response
-    with raises(ClientError):
-        await Bluesky.authenticated(client)
+    with raises(ClientError, match="SomeError: Oops"):
+        await Bluesky(client).auth()
 
 
 @mark.asyncio
@@ -55,7 +58,8 @@ async def test_bluesky_client_gets_a_jwt_token_and_did():
         "handle": "cuducos",
     }
     client.post.return_value = response
-    bluesky = await Bluesky.authenticated(client)
+    bluesky = Bluesky(client)
+    await bluesky.auth()
     assert bluesky.token == "a very long string"
     assert bluesky.did == "42"
     assert bluesky.handle == "cuducos"
@@ -66,6 +70,7 @@ async def test_bluesky_client_post_data():
     client, response = AsyncMock(), Mock()
     client.post.return_value = response
     bluesky = Bluesky(client)
+    bluesky.is_authenticated = True
     bluesky.did = "42"
     data = await bluesky.data(Post("hello world, the answer is 42"))
     assert data == {
@@ -90,6 +95,7 @@ async def test_bluesky_client_post():
     }
     client.post.return_value = response
     bluesky = Bluesky(client)
+    bluesky.is_authenticated = True
     bluesky.token = "fourty-two"
     bluesky.did = "42"
     bluesky.handle = "cuducos"
@@ -107,6 +113,7 @@ async def test_bluesky_client_post_raises_error_from_server():
     }
     client.post.return_value = response
     bluesky = Bluesky(client)
+    bluesky.is_authenticated = True
     post = Post("Hello")
     with raises(ClientError):
         await bluesky.post(post)
@@ -116,6 +123,7 @@ async def test_bluesky_client_post_raises_error_from_server():
 async def test_bluesky_client_post_data_includes_urls_in_facets():
     client = AsyncMock()
     bluesky = Bluesky(client)
+    bluesky.is_authenticated = True
     text = "✨ example mentioning @atproto.com to share the URL 👨‍❤️‍👨 https://en.wikipedia.org/wiki/CBOR."
     data = await bluesky.data(Post(text))
     assert data["record"]["facets"] == [
@@ -138,6 +146,7 @@ async def test_bluesky_client_post_data_includes_images_blobs():
     response.json.return_value = {"blob": "42"}
     client.post.return_value = response
     bluesky = Bluesky(client)
+    bluesky.is_authenticated = True
     bluesky.token = "token"
     bluesky.did = "did"
     media = Media("/tmp/42.png", b"42", "image/png", "my alt text")
