@@ -1,4 +1,4 @@
-# Not my ex [![Tests](https://github.com/cuducos/not-my-ex/actions/workflows/pytest.yml/badge.svg)](https://github.com/cuducos/not-my-ex/actions/workflows/pytest.yml)
+# Not my ex [![PyPI](https://img.shields.io/pypi/v/not-my-ex)](https://pypi.org/project/not-my-ex/) [![Tests](https://img.shields.io/github/actions/workflow/status/cuducos/not-my-ex/pytest.yml)](https://github.com/cuducos/not-my-ex/actions/workflows/pytest.yml) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/not-my-ex)](https://pypi.org/project/not-my-ex/)
 
 Tiny CLI to post simultaneously to Mastodon and Bluesky.
 
