@@ -22,7 +22,7 @@ It does not support:
 
 #### Environment variables
 
-##### To repost in [Bluesky](https://bsky.app)
+##### To post to [Bluesky](https://bsky.app)
 
 | Name | Description | Example | Default value |
 |---|---|---|---|
@@ -30,16 +30,16 @@ It does not support:
 | `NOT_MY_EX_BSKY_EMAIL` | Email used in Bluesky | `"cuducos@mailinator.com"` | `None` |
 | `NOT_MY_EX_BSKY_PASSWORD` | Password used in Bluesky | As created in [App Passwords](https://bsky.app/settings/app-passwords). | `None` |
 
-Not setting `NOT_MY_EX_BSKY_EMAIL` **or** `NOT_MY_EX_BSKY_PASSWORD` disables Bluesky reposting.
+Not setting `NOT_MY_EX_BSKY_EMAIL` **or** `NOT_MY_EX_BSKY_PASSWORD` disables posting to Bluesky.
 
-##### To repost in [Mastodon](https://joinmastodon.org/)
+##### To post to [Mastodon](https://joinmastodon.org/)
 
 | Name | Description | Example | Default value |
 |---|---|---|---|
 | `NOT_MY_EX_MASTODON_INSTANCE` | Mastodon instance | `"https://tech.lgbt"` | `"https://mastodon.social"` |
 | `NOT_MY_EX_MASTODON_TOKEN` | Mastodon access token | Go to your _Settings_, _Development_ and then create an app to get the access token. Select the `write:statuses` and `write:media` scopes. | `None` |
 
-Not setting `NOT_MY_EX_MASTODON_TOKEN` disables Mastodon reposting.
+Not setting `NOT_MY_EX_MASTODON_TOKEN` disables posting to Mastodon.
 
 ## Install
 
@@ -53,7 +53,7 @@ $ pip install not-my-ex
 ### CLI
 
 ```console
-$ not-my-ex "Magic, madness, heaven, sin " --images /tmp/1989.gif
+$ not-my-ex "Magic, madness, heaven, sin" --images /tmp/1989.gif
 ```
 
 You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --images swift.gif`).
@@ -78,7 +78,7 @@ async def main():
     )
     media = await gather(*media_tasks)
 
-    post = Post(text="Magic, madness, heaven, sin ", media=media, lang="en")
+    post = Post(text="Magic, madness, heaven, sin", media=media, lang="en")
     async with AsyncClient() as http:
         post_tasks = tuple(cls(http).post(post) for cls in (Bluesky, Mastodon))
         await gather(*post_tasks)
