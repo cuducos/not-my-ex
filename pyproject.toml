@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "not-my-ex"
-version = "0.0.4"
+version = "0.0.5"
 description = "Tiny CLI to post simultaneously to Mastodon and Bluesky"
 authors = ["Eduardo Cuducos <4732915+cuducos@users.noreply.github.com>"]
 license = "GPL-3"
