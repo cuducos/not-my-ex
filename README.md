@@ -1,4 +1,4 @@
-# Not my ex
+# Not my ex [![Tests](https://github.com/cuducos/not-my-ex/actions/workflows/pytest.yml/badge.svg)](https://github.com/cuducos/not-my-ex/actions/workflows/pytest.yml)
 
 Tiny CLI to post simultaneously to Mastodon and Bluesky.
 
