@@ -18,7 +18,7 @@ It does not support:
 ### Requirements
 
 * Python 3.9 or newer
-* [Poetry](https://python-poetry.org)
+* [`uv`](https://docs.astral.sh/uv) Python package manager
 
 #### Environment variables
 
@@ -91,6 +91,5 @@ In `Post`, both `media` and `lang` are optional. In `Media`, `alt` is optional.
 The tests include [Ruff](https://docs.astral.sh/ruff/) and [Mypy](https://www.mypy-lang.org/):
 
 ```console
-$ poetry install
-$ poetry run pytest
+$ uv run python -m pytest
 ```
