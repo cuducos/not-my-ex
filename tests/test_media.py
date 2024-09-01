@@ -22,8 +22,8 @@ async def test_media_from_img_not_found():
 @mark.asyncio
 async def test_media_from_img_without_mime_type(image):
     path, _ = image
-    with patch("not_my_ex.media.guess_type") as guess:
-        guess.return_value = None, None
+    with patch("not_my_ex.media.mime_for") as guess:
+        guess.return_value = None
         with raises(ValueError):
             await Media.from_img(path)
 

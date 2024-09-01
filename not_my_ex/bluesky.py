@@ -7,6 +7,7 @@ from httpx import AsyncClient, ReadTimeout, Response
 from pytz import UTC
 
 from not_my_ex import settings
+from not_my_ex.card import Card
 from not_my_ex.client import Client
 from not_my_ex.media import Media
 from not_my_ex.post import Post
@@ -90,11 +91,15 @@ class Bluesky(Client):
             },
         }
 
+        first_link = None
         if matches := URL.findall(post.text):
             data["record"]["facets"] = []
             start = 0
             source = post.text.encode()
             for url, *_ in matches:
+                if not first_link:
+                    first_link = url
+
                 target = url.encode()
                 start = source.find(target, start)
                 end = start + len(target)
@@ -118,6 +123,22 @@ class Bluesky(Client):
                 "$type": "app.bsky.embed.images",
                 "images": embed,
             }
+        elif first_link:
+            card = await Card.from_url(first_link)
+            if card:
+                embed = {
+                    "$type": "app.bsky.embed.external",
+                    "external": {
+                        "uri": card.uri,
+                        "title": card.title,
+                    },
+                }
+                if card.description:
+                    embed["external"]["description"] = card.description
+                if card.media:
+                    uploaded = await self.upload(card.media)
+                    embed["external"]["thumb"] = uploaded["image"]
+                data["record"]["embed"] = embed
 
         return data
 
