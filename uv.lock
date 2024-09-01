@@ -332,8 +332,8 @@ wheels = [
 
 [[package]]
 name = "not-my-ex"
-version = "0.0.5"
-source = { virtual = "." }
+version = "0.0.6"
+source = { editable = "." }
 dependencies = [
     { name = "aiofiles" },
     { name = "backoff" },
