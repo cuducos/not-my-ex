@@ -3,9 +3,10 @@ name = "not-my-ex"
 version = "0.0.5"
 description = "Tiny CLI to post simultaneously to Mastodon and Bluesky"
 authors = ["Eduardo Cuducos <4732915+cuducos@users.noreply.github.com>"]
-license = "GPL-3"
+license = "GPL-3.0-or-later"
 readme = "README.md"
 requires-python = ">=3.9,<3.14"
+repository = "https://github.com/cuducos/not-my-ex"
 dependencies = [
     "aiofiles>=24.1.0",
     "backoff>=2.2.1",
