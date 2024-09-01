@@ -29,7 +29,7 @@ async def post_and_print_url(key: str, http: AsyncClient, post: Post) -> None:
         print(str(exc), file=stderr)
         return
 
-    print(f"[{client.name}] {url}")
+    echo(f"{client.emoji} {style(client.name, bold=True)} {url}")
 
 
 async def media_from(path: str, ask_for_alt_text: bool) -> Media:

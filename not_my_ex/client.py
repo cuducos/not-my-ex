@@ -19,6 +19,13 @@ class Client(ABC):
     def name(self):
         return self.__class__.__name__.split(".")[-1]
 
+    @property
+    def emoji(self):
+        if self.name == "Bluesky":
+            return "🦋"
+        if self.name == "Mastodon":
+            return "🐘"
+
     def raise_from(self, response: Response) -> None:
         data = response.json()
         if "message" in data:
