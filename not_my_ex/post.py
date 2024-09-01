@@ -20,7 +20,10 @@ class Post:
 
     def __post_init__(self):
         if len(self.text) > LIMIT:
-            raise PostTooLongError(f"Text cannot be longer than {LIMIT} characters")
+            raise PostTooLongError(
+                f"Text cannot be longer than {LIMIT} characters. This text is "
+                f"{len(self.text)} characters long."
+            )
 
         if not self.lang:
             detector = LanguageDetector()

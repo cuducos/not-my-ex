@@ -4,13 +4,13 @@ from typing import Annotated, List
 
 from aiofiles import open, os
 from httpx import AsyncClient
-from typer import Option, run
+from typer import Option, colors, echo, run, style
 
 from not_my_ex.bluesky import Bluesky
 from not_my_ex.client import ClientError
 from not_my_ex.mastodon import Mastodon
 from not_my_ex.media import Media
-from not_my_ex.post import Post
+from not_my_ex.post import Post, PostTooLongError
 from not_my_ex.settings import BLUESKY, CLIENTS_AVAILABLE, MASTODON
 
 CLIENTS = {BLUESKY: Bluesky, MASTODON: Mastodon}
@@ -80,7 +80,12 @@ def wrapper(
 
 
 def cli() -> None:
-    run(wrapper)
+    try:
+        run(wrapper)
+    except PostTooLongError as err:
+        title = style(err.__class__.__name__, bold=True, fg=colors.RED)
+        echo(f"{title} {err}")
+        exit(1)
 
 
 if __name__ == "__main__":
