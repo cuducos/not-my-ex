@@ -18,7 +18,6 @@ It does not support:
 ### Requirements
 
 * Python 3.9 or newer
-* [`uv`](https://docs.astral.sh/uv) Python package manager
 
 #### Environment variables
 
@@ -88,7 +87,7 @@ In `Post`, both `media` and `lang` are optional. In `Media`, `alt` is optional.
 
 ## Contributing
 
-The tests include [Ruff](https://docs.astral.sh/ruff/) and [Mypy](https://www.mypy-lang.org/):
+Requires [`uv`](https://docs.astral.sh/uv) Python package manager. The tests include [Ruff](https://docs.astral.sh/ruff/) and [Mypy](https://www.mypy-lang.org/):
 
 ```console
 $ uv run python -m pytest
