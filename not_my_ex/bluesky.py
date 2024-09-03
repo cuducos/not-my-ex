@@ -73,7 +73,7 @@ class Bluesky(Client):
             self.raise_from(resp)
 
         data = resp.json()
-        return {"alt": media.alt, "image": data["blob"]}
+        return {"alt": media.alt or "", "image": data["blob"]}
 
     async def data(self, post):
         if not self.is_authenticated:

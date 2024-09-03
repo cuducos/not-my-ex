@@ -11,7 +11,7 @@ from not_my_ex.client import ClientError
 from not_my_ex.mastodon import Mastodon
 from not_my_ex.media import Media
 from not_my_ex.post import Post, PostTooLongError
-from not_my_ex.settings import BLUESKY, CLIENTS_AVAILABLE, MASTODON
+from not_my_ex.settings import BLUESKY, CLIENTS_AVAILABLE, MASTODON, DEFAULT_LANG
 
 CLIENTS = {BLUESKY: Bluesky, MASTODON: Mastodon}
 
@@ -49,7 +49,7 @@ async def main(text: str, images: List[str], yes_to_all: bool) -> None:
 
     load = tuple(media_from(path, not yes_to_all) for path in images)
     imgs = await gather(*load)
-    post = Post(text, imgs or None)
+    post = Post(text, imgs or None, lang=DEFAULT_LANG)
     if not yes_to_all:
         post.check_language()
 
