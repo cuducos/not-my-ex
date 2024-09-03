@@ -11,7 +11,7 @@ from not_my_ex.client import ClientError
 from not_my_ex.mastodon import Mastodon
 from not_my_ex.media import Media
 from not_my_ex.post import Post, PostTooLongError
-from not_my_ex.settings import BLUESKY, CLIENTS_AVAILABLE, MASTODON, DEFAULT_LANG
+from not_my_ex.settings import BLUESKY, CLIENTS_AVAILABLE, DEFAULT_LANG, MASTODON
 
 CLIENTS = {BLUESKY: Bluesky, MASTODON: Mastodon}
 
