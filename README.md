@@ -21,6 +21,13 @@ It does not support:
 
 #### Environment variables
 
+##### General settings
+
+| Name | Description | Example | Default value |
+|---|---|---|---|
+| `NOT_MY_EX_DEFAULT_LANG` | 2-letter ISO 639-1 code | `"pt"` | `None` |
+
+
 ##### To post to [Bluesky](https://bsky.app)
 
 | Name | Description | Example | Default value |

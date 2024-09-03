@@ -11,7 +11,7 @@ from not_my_ex.client import ClientError
 from not_my_ex.mastodon import Mastodon
 from not_my_ex.media import Media
 from not_my_ex.post import Post, PostTooLongError
-from not_my_ex.settings import BLUESKY, CLIENTS_AVAILABLE, MASTODON
+from not_my_ex.settings import BLUESKY, CLIENTS_AVAILABLE, MASTODON, DEFAULT_LANG
 
 CLIENTS = {BLUESKY: Bluesky, MASTODON: Mastodon}
 
@@ -42,6 +42,7 @@ async def media_from(path: str, ask_for_alt_text: bool) -> Media:
 async def main(
     text: str, images: List[str], lang: Optional[str], yes_to_all: bool
 ) -> None:
+    lang = lang or DEFAULT_LANG
     if len(images) > 4:
         raise ValueError("You can only post up to 4 images")
 

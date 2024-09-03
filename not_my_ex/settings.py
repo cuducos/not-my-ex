@@ -15,6 +15,8 @@ BSKY_PASSWORD = getenv("NOT_MY_EX_BSKY_PASSWORD")
 MASTODON_INSTANCE = getenv("NOT_MY_EX_MASTODON_INSTANCE", "https://mastodon.social")
 MASTODON_TOKEN = getenv("NOT_MY_EX_MASTODON_TOKEN")
 
+DEFAULT_LANG = getenv("NOT_MY_EX_DEFAULT_LANG", None)
+
 CLIENTS_AVAILABLE = set(
     key
     for key, value in (
