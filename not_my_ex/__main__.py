@@ -1,6 +1,6 @@
 from asyncio import gather, get_event_loop
 from sys import stderr
-from typing import Annotated, List
+from typing import Annotated, List, Optional
 
 from aiofiles import open, os
 from httpx import AsyncClient
@@ -39,7 +39,10 @@ async def media_from(path: str, ask_for_alt_text: bool) -> Media:
     return media
 
 
-async def main(text: str, images: List[str], yes_to_all: bool) -> None:
+async def main(
+    text: str, images: List[str], lang: Optional[str], yes_to_all: bool
+) -> None:
+    lang = lang or DEFAULT_LANG
     if len(images) > 4:
         raise ValueError("You can only post up to 4 images")
 
@@ -49,8 +52,8 @@ async def main(text: str, images: List[str], yes_to_all: bool) -> None:
 
     load = tuple(media_from(path, not yes_to_all) for path in images)
     imgs = await gather(*load)
-    post = Post(text, imgs or None, lang=DEFAULT_LANG)
-    if not yes_to_all:
+    post = Post(text, imgs or None, lang)
+    if not lang and not yes_to_all:
         post.check_language()
 
     async with AsyncClient() as http:
@@ -59,10 +62,14 @@ async def main(text: str, images: List[str], yes_to_all: bool) -> None:
 
 
 def wrapper(
-    text: str,
+    post: str,
     images: Annotated[
-        List[str], Option(help="Path to the images to post (max. 4)")
+        List[str], Option("--images", "-i", help="Path to the images to post (max. 4)")
     ] = [],
+    lang: Annotated[
+        Optional[str],
+        Option("--lang", "-l", help="Language for the post (2-letter ISO 639-1 code)"),
+    ] = None,
     yes_to_all: Annotated[
         bool,
         Option(
@@ -74,9 +81,9 @@ def wrapper(
 ) -> None:
     """not-my-ex post micro blogging to Mastodon and Bluesky.
 
-    TEXT is the post text itself, or the path to a text file."""
+    POST is the post text itself, or the path to a text file."""
     loop = get_event_loop()
-    loop.run_until_complete(main(text, images, yes_to_all))
+    loop.run_until_complete(main(post, images, lang, yes_to_all))
 
 
 def cli() -> None:
