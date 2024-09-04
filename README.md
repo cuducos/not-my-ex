@@ -1,11 +1,11 @@
 # Not my ex [![PyPI](https://img.shields.io/pypi/v/not-my-ex)](https://pypi.org/project/not-my-ex/) [![Tests](https://img.shields.io/github/actions/workflow/status/cuducos/not-my-ex/pytest.yml)](https://github.com/cuducos/not-my-ex/actions/workflows/pytest.yml) [![PyPI - Python Version](https://img.shields.io/pypi/pyversions/not-my-ex)](https://pypi.org/project/not-my-ex/)
 
-Tiny CLI to post simultaneously to Mastodon and Bluesky.
+Tiny app to post simultaneously to Mastodon and Bluesky.
 
 <small>Obviously, based on [`cuducos/from-my-ex`](https://github.com/cuducos/from-my-ex).</small>
 
 It supports:
-* Post status updates to both networks with a simple CLI command
+* Post status updates to both networks with a simple CLI command or GUI interface
 * Posting with images
 * Including alt text for images
 * Setting post language
@@ -53,6 +53,8 @@ Not setting `NOT_MY_EX_MASTODON_TOKEN` disables posting to Mastodon.
 $ pip install not-my-ex
 ```
 
+If you want to use the [GUI](https://en.wikipedia.org/wiki/Graphical_user_interface), `pip install not-my-ex[gui]`:
+
 ## Usage
 
 
@@ -63,6 +65,18 @@ $ not-my-ex "Magic, madness, heaven, sin" --images /tmp/1989.gif
 ```
 
 You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --images swift.gif`).
+
+### GUI
+
+If you have installed the GUI extra:
+
+```console
+$ not-my-ex-gui
+```
+
+This is how it looks like:
+
+![Screenshot of `not-my-ex` GUI](gui.png)
 
 ### API
 

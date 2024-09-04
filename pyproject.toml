@@ -26,11 +26,18 @@ dependencies = [
     "typer>=0.12.5",
 ]
 
+[project.optional-dependencies]
+gui = [
+    "wxasync[gui]>=0.49",
+    "wxpython[gui]>=4.2.1",
+]
+
 [project.urls]
 Repository = "https://github.com/cuducos/not-my-ex"
 
 [project.scripts]
 "not-my-ex" = "not_my_ex.__main__:cli"
+"not-my-ex-gui" = "not_my_ex.gui:gui"
 
 [tool.uv]
 dev-dependencies = [
@@ -42,6 +49,7 @@ dev-dependencies = [
     "types-aiofiles>=24.1.0.20240626",
     "types-beautifulsoup4>=4.12.0.20240511",
     "types-pytz>=2024.1.0.20240417",
+    "types-wxpython>=0.9.7",
 ]
 
 [tool.pytest.ini_options]
