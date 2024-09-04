@@ -53,10 +53,9 @@ Not setting `NOT_MY_EX_MASTODON_TOKEN` disables posting to Mastodon.
 $ pip install not-my-ex
 ```
 
-If you want to use the [GUI](https://en.wikipedia.org/wiki/Graphical_user_interface), `pip install not-my-ex[gui]`:
+If you want to use the [GUI](https://en.wikipedia.org/wiki/Graphical_user_interface), `pip install not-my-ex[gui]`.
 
 ## Usage
-
 
 ### CLI
 
