@@ -14,6 +14,7 @@ BSKY_PASSWORD = "password"
 BSKY_AGENT = "agent"
 MSTDN_TOKEN = "token"
 MSTDN_INSTANCE = "instance"
+LANG = "pt"
 
 
 @fixture(autouse=True)
@@ -31,22 +32,26 @@ def test_assert_auth_with_right_password():
     assert not auth.data.bluesky
     assert not auth.data.mastodon
 
-    auth.save_bluesky_auth(BSKY_EMAIL, BSKY_PASSWORD)
+    auth.save_language(LANG)
     assert auth.path.exists()
+    assert auth.data.language == LANG
+    assert not auth.data.bluesky
+    assert not auth.data.mastodon
+
+    auth.save_bluesky_auth(BSKY_EMAIL, BSKY_PASSWORD)
+    assert auth.data.language == LANG
     assert auth.data.bluesky.email == BSKY_EMAIL
     assert auth.data.bluesky.password == BSKY_PASSWORD
     assert auth.data.bluesky.agent == DEFAULT_BLUESKY_AGENT
     assert not auth.data.mastodon
 
     auth.save_mastodon_auth(MSTDN_TOKEN)
-    assert auth.path.exists()
-    assert auth.data.mastodon.token == MSTDN_TOKEN
-    assert auth.data.mastodon.instance == DEFAULT_MASTODON_INSTANCE
-
-    # and let's make sure the first write still persisted
+    assert auth.data.language == LANG
     assert auth.data.bluesky.email == BSKY_EMAIL
     assert auth.data.bluesky.password == BSKY_PASSWORD
     assert auth.data.bluesky.agent == DEFAULT_BLUESKY_AGENT
+    assert auth.data.mastodon.token == MSTDN_TOKEN
+    assert auth.data.mastodon.instance == DEFAULT_MASTODON_INSTANCE
 
 
 def test_assert_auth_with_right_password_and_custom_instances():

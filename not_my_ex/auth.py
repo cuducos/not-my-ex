@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from os import urandom
 from pathlib import Path
 from pickle import dumps, loads
-from typing import Optional, Union
+from typing import Optional
 
 from appdirs import user_cache_dir
 from cryptography.fernet import Fernet
@@ -30,8 +30,9 @@ class MastodonAuth:
 
 @dataclass
 class AuthData:
-    bluesky: Optional[BlueskyAuth]
-    mastodon: Optional[MastodonAuth]
+    bluesky: Optional[BlueskyAuth] = None
+    mastodon: Optional[MastodonAuth] = None
+    language: Optional[str] = None
 
 
 class FernetWithPassword(Fernet):
@@ -56,7 +57,7 @@ class Auth:
         else:
             self.salt = urandom(SALT_SIZE)
             self.algorithm = FernetWithPassword(password.encode("utf-8"), self.salt)
-            self.data = AuthData(None, None)
+            self.data = AuthData()
 
     @property
     def bluesky(self) -> Optional[BlueskyAuth]:
@@ -66,14 +67,16 @@ class Auth:
     def mastodon(self) -> Optional[MastodonAuth]:
         return self.data.mastodon
 
-    def persist(self, auth: Union[BlueskyAuth, MastodonAuth]) -> None:
+    def persist(self, data: BlueskyAuth | MastodonAuth | str) -> None:
         if not self.path.exists():
             self.path.parent.mkdir(exist_ok=True)
 
-        if isinstance(auth, BlueskyAuth):
-            self.data.bluesky = auth
-        if isinstance(auth, MastodonAuth):
-            self.data.mastodon = auth
+        if isinstance(data, BlueskyAuth):
+            self.data.bluesky = data
+        if isinstance(data, MastodonAuth):
+            self.data.mastodon = data
+        if isinstance(data, str):
+            self.data.language = data
 
         with self.path.open("wb") as cursor:
             cursor.write(self.salt)
@@ -89,3 +92,6 @@ class Auth:
     def save_mastodon_auth(self, token: str, instance: Optional[str] = None) -> None:
         assert token, "Token cannot be empty"
         self.persist(MastodonAuth(instance or DEFAULT_MASTODON_INSTANCE, token))
+
+    def save_language(self, language: str) -> None:
+        self.persist(language)
