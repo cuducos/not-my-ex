@@ -53,7 +53,7 @@ dev-dependencies = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--ruff --ruff-format --mypy"
+addopts = "--ruff --ruff-format --mypy --pdbcls=IPython.terminal.debugger:Pdb"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]
