@@ -140,6 +140,41 @@ async def test_bluesky_client_post_data_includes_urls_in_facets():
 
 
 @mark.asyncio
+async def test_bluesky_client_post_data_includes_urls_and_hashtag_in_facets():
+    client = AsyncMock()
+    bluesky = Bluesky(client)
+    bluesky.is_authenticated = True
+    text = "✨ example mentioning @atproto.com to #share the URL 👨‍❤️‍👨 https://en.wikipedia.org/wiki/CBOR#42."
+    data = await bluesky.data(Post(text))
+    assert data["record"]["facets"] == [
+        {
+            "features": [
+                {
+                    "$type": "app.bsky.richtext.facet#link",
+                    "uri": "https://en.wikipedia.org/wiki/CBOR#42",
+                },
+            ],
+            "index": {
+                "byteEnd": 112,
+                "byteStart": 75,
+            },
+        },
+        {
+            "features": [
+                {
+                    "$type": "app.bsky.richtext.facet#tag",
+                    "tag": "#share",
+                },
+            ],
+            "index": {
+                "byteEnd": 45,
+                "byteStart": 39,
+            },
+        },
+    ]
+
+
+@mark.asyncio
 async def test_bluesky_client_post_data_includes_images_blobs():
     client, response = AsyncMock(), Mock()
     response.status_code = 200

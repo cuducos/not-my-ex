@@ -1,6 +1,7 @@
 from asyncio import gather
 from datetime import datetime, timezone
 from re import compile
+from string import punctuation
 
 from backoff import expo, on_exception
 from httpx import AsyncClient, ReadTimeout, Response
@@ -11,6 +12,8 @@ from not_my_ex.client import Client
 from not_my_ex.media import Media
 from not_my_ex.post import Post
 
+PUNCTUATION = set(punctuation)
+HASHTAG = compile(r"#\S+")
 URL = compile(
     r"(http(s?):\/\/([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&:\/~+#-]*[\w@?^=%&\/~+#-]))"
 )
@@ -92,7 +95,7 @@ class Bluesky(Client):
 
         first_link = None
         if matches := URL.findall(post.text):
-            data["record"]["facets"] = []
+            data["record"]["facets"] = data["record"].get("facets", [])
             start = 0
             source = post.text.encode()
             for url, *_ in matches:
@@ -109,6 +112,46 @@ class Bluesky(Client):
                             {
                                 "$type": "app.bsky.richtext.facet#link",
                                 "uri": url,
+                            }
+                        ],
+                    }
+                )
+                start = end
+
+        url_intervals = tuple(
+            (url["index"]["byteStart"], url["index"]["byteEnd"])
+            for url in data["record"].get("facets", [])
+        )
+
+        def is_inside_url(pos):
+            for start, end in url_intervals:
+                if start < pos < end:
+                    return True
+            return False
+
+        if matches := HASHTAG.findall(post.text):
+            data["record"]["facets"] = data["record"].get("facets", [])
+            start = 0
+            source = post.text.encode()
+            for hashtag in matches:
+                if hashtag.removeprefix("#").isdigit():
+                    continue
+                while hashtag[-1:] in PUNCTUATION:
+                    hashtag = hashtag[:-1]
+                if len(hashtag) < 2:
+                    continue
+                target = hashtag.encode()
+                start = source.find(target, start)
+                if is_inside_url(start):
+                    continue
+                end = start + len(target)
+                data["record"]["facets"].append(
+                    {
+                        "index": {"byteStart": start, "byteEnd": end},
+                        "features": [
+                            {
+                                "$type": "app.bsky.richtext.facet#tag",
+                                "tag": hashtag,
                             }
                         ],
                     }
