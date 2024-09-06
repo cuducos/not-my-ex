@@ -1,10 +1,9 @@
 from asyncio import gather
-from datetime import datetime
+from datetime import datetime, timezone
 from re import compile
 
 from backoff import expo, on_exception
 from httpx import AsyncClient, ReadTimeout, Response
-from pytz import UTC
 
 from not_my_ex import settings
 from not_my_ex.card import Card
@@ -79,7 +78,7 @@ class Bluesky(Client):
         if not self.is_authenticated:
             await self.auth()
 
-        created_at = datetime.utcnow().replace(microsecond=0, tzinfo=UTC).isoformat()
+        created_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
         data = {
             "repo": self.did,
             "collection": "app.bsky.feed.post",

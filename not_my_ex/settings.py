@@ -8,11 +8,13 @@ class EnvironmentVariableNotFoundError(Exception):
 BLUESKY = "bsky"
 MASTODON = "mstdn"
 
-BSKY_AGENT = getenv("NOT_MY_EX_BSKY_AGENT", "https://bsky.social")
+DEFAULT_BLUESKY_AGENT = "https://bsky.social"
+BSKY_AGENT = getenv("NOT_MY_EX_BSKY_AGENT", DEFAULT_BLUESKY_AGENT)
 BSKY_EMAIL = getenv("NOT_MY_EX_BSKY_EMAIL")
 BSKY_PASSWORD = getenv("NOT_MY_EX_BSKY_PASSWORD")
 
-MASTODON_INSTANCE = getenv("NOT_MY_EX_MASTODON_INSTANCE", "https://mastodon.social")
+DEFAULT_MASTODON_INSTANCE = "https://mastodon.social"
+MASTODON_INSTANCE = getenv("NOT_MY_EX_MASTODON_INSTANCE", DEFAULT_MASTODON_INSTANCE)
 MASTODON_TOKEN = getenv("NOT_MY_EX_MASTODON_TOKEN")
 
 DEFAULT_LANG = getenv("NOT_MY_EX_DEFAULT_LANG")
