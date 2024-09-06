@@ -15,6 +15,10 @@ from not_my_ex.settings import DEFAULT_BLUESKY_AGENT, DEFAULT_MASTODON_INSTANCE
 SALT_SIZE = 42
 
 
+def cache():
+    return Path(user_cache_dir("not-my-ex")) / "auth"
+
+
 @dataclass
 class BlueskyAuth:
     agent: str
@@ -47,7 +51,7 @@ class Auth:
     locally in an encrypted password-protected file."""
 
     def __init__(self, password: str) -> None:
-        self.path = Path(user_cache_dir("not-my-ex")) / "auth"
+        self.path = cache()
         if self.path.exists():
             with self.path.open("rb") as cursor:
                 self.salt = cursor.read(SALT_SIZE)

@@ -29,8 +29,8 @@ dependencies = [
 
 [project.optional-dependencies]
 gui = [
-    "wxasync[gui]>=0.49",
-    "wxpython[gui]>=4.2.1",
+    "wxasync>=0.49",
+    "wxpython>=4.2.1",
 ]
 
 [project.urls]

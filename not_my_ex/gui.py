@@ -1,45 +1,36 @@
-from asyncio import gather, run
+from asyncio import gather
 from typing import Iterable, Optional
 
 from httpx import AsyncClient
-
-try:
-    from wx import (
-        ALIGN_CENTER,
-        ALIGN_CENTER_VERTICAL,
-        ALL,
-        EVT_BUTTON,
-        EVT_FILEPICKER_CHANGED,
-        EVT_TEXT,
-        EXPAND,
-        HORIZONTAL,
-        ICON_ERROR,
-        ICON_INFORMATION,
-        LEFT,
-        OK,
-        RIGHT,
-        TE_MULTILINE,
-        TOP,
-        VERTICAL,
-        BoxSizer,
-        Button,
-        Colour,
-        FilePickerCtrl,
-        Frame,
-        MessageBox,
-        Panel,
-        StaticText,
-        TextCtrl,
-        Window,
-    )
-    from wxasync import AsyncBind, WxAsyncApp  # type: ignore
-except ModuleNotFoundError:
-    msg = (
-        "The GUI is only available if `not-my-ex` is installed with the `gui` extra. "
-        "For example, try `pip install not-my-ex[gui]` and then `not-my-ex-gui` again."
-    )
-    raise RuntimeError(msg)
-
+from wx import (
+    ALIGN_CENTER,
+    ALIGN_CENTER_VERTICAL,
+    ALL,
+    EVT_BUTTON,
+    EVT_FILEPICKER_CHANGED,
+    EVT_TEXT,
+    EXPAND,
+    HORIZONTAL,
+    ICON_ERROR,
+    ICON_INFORMATION,
+    LEFT,
+    OK,
+    RIGHT,
+    TE_MULTILINE,
+    TOP,
+    VERTICAL,
+    BoxSizer,
+    Button,
+    Colour,
+    FilePickerCtrl,
+    Frame,
+    MessageBox,
+    Panel,
+    StaticText,
+    TextCtrl,
+    Window,
+)
+from wxasync import AsyncBind, WxAsyncApp  # type: ignore
 
 from not_my_ex.bluesky import Bluesky
 from not_my_ex.client import ClientError
@@ -186,7 +177,7 @@ class NotMyExFrame(Frame):
         self.Close()
 
 
-async def wrapper() -> None:
+async def gui() -> None:
     async with AsyncClient() as session:
         app = WxAsyncApp()
         frame = NotMyExFrame(session, None)
@@ -194,7 +185,3 @@ async def wrapper() -> None:
         frame.Show()
         app.SetTopWindow(frame)
         await app.MainLoop()
-
-
-def gui():
-    run(wrapper())

@@ -1,99 +1,35 @@
-from asyncio import gather, get_event_loop
-from sys import stderr
-from typing import Annotated, List, Optional
+from asyncio import get_event_loop
+from importlib import import_module
+from importlib.metadata import version
 
-from aiofiles import open, os
-from httpx import AsyncClient
-from typer import Option, colors, echo, run, style
+from typer import Typer
 
-from not_my_ex.bluesky import Bluesky
-from not_my_ex.client import ClientError
-from not_my_ex.mastodon import Mastodon
-from not_my_ex.media import Media
-from not_my_ex.post import Post, PostTooLongError
-from not_my_ex.settings import BLUESKY, CLIENTS_AVAILABLE, DEFAULT_LANG, MASTODON
-
-CLIENTS = {BLUESKY: Bluesky, MASTODON: Mastodon}
+from not_my_ex.cli.config import clean, config
+from not_my_ex.cli.post import post
 
 
-async def post_and_print_url(key: str, http: AsyncClient, post: Post) -> None:
+def register_gui_if_available(app):
     try:
-        cls = CLIENTS[key]
-    except KeyError:
-        raise ValueError(f"Unknown client {key}, options are: {', '.join(CLIENTS)}")
-
-    client = cls(http)
-    try:
-        url = await cls(http).post(post)
-    except ClientError as exc:
-        print(str(exc), file=stderr)
+        module = import_module("not_my_ex.gui")
+    except ImportError:
         return
 
-    echo(f"{client.emoji} {style(client.name, bold=True)} {url}")
+    def gui() -> None:
+        """Opens the GUI to creaet and post."""
+        loop = get_event_loop()
+        loop.run_until_complete(module.gui)
 
-
-async def media_from(path: str, ask_for_alt_text: bool) -> Media:
-    media = await Media.from_img(path)
-    if ask_for_alt_text:
-        media.check_alt_text()
-    return media
-
-
-async def main(
-    text: str, images: List[str], lang: Optional[str], yes_to_all: bool
-) -> None:
-    lang = lang or DEFAULT_LANG
-    if len(images) > 4:
-        raise ValueError("You can only post up to 4 images")
-
-    if await os.path.exists(text):
-        async with open(text) as handler:
-            text = await handler.read()
-
-    load = tuple(media_from(path, not yes_to_all) for path in images)
-    imgs = await gather(*load)
-    post = Post(text, imgs or None, lang)
-    if not lang and not yes_to_all:
-        post.check_language()
-
-    async with AsyncClient() as http:
-        tasks = tuple(post_and_print_url(key, http, post) for key in CLIENTS_AVAILABLE)
-        await gather(*tasks)
-
-
-def wrapper(
-    post: str,
-    images: Annotated[
-        List[str], Option("--images", "-i", help="Path to the images to post (max. 4)")
-    ] = [],
-    lang: Annotated[
-        Optional[str],
-        Option("--lang", "-l", help="Language for the post (2-letter ISO 639-1 code)"),
-    ] = None,
-    yes_to_all: Annotated[
-        bool,
-        Option(
-            "--yes-to-all",
-            "-y",
-            help="Do not ask for alt text for images and/or post language confirmation",
-        ),
-    ] = False,
-) -> None:
-    """not-my-ex post micro blogging to Mastodon and Bluesky.
-
-    POST is the post text itself, or the path to a text file."""
-    loop = get_event_loop()
-    loop.run_until_complete(main(post, images, lang, yes_to_all))
-
-
-def cli() -> None:
-    try:
-        run(wrapper)
-    except PostTooLongError as err:
-        title = style(err.__class__.__name__, bold=True, fg=colors.RED)
-        echo(f"{title} {err}")
-        exit(1)
+    app.command()(gui)
 
 
 if __name__ == "__main__":
-    cli()
+    app = Typer(
+        name=f"not-my-ex {version('not_my_ex')}",
+        help="not-my-ex posts micro blogging to Mastodon and Bluesky.",
+    )
+
+    app.command()(post)
+    app.command()(clean)
+    app.command()(config)
+    register_gui_if_available(app)
+    app()
