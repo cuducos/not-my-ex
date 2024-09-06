@@ -3,7 +3,7 @@ from dataclasses import dataclass
 from os import urandom
 from pathlib import Path
 from pickle import dumps, loads
-from typing import Optional
+from typing import Optional, Union
 
 from appdirs import user_cache_dir
 from cryptography.fernet import Fernet
@@ -71,7 +71,7 @@ class Auth:
     def language(self) -> Optional[str]:
         return self.data.language
 
-    def persist(self, data: BlueskyAuth | MastodonAuth | str) -> None:
+    def persist(self, data: Union[ BlueskyAuth , MastodonAuth , str]) -> None:
         if not self.path.exists():
             self.path.parent.mkdir(exist_ok=True)
 
