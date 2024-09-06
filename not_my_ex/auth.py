@@ -67,6 +67,10 @@ class Auth:
     def mastodon(self) -> Optional[MastodonAuth]:
         return self.data.mastodon
 
+    @property
+    def language(self) -> Optional[str]:
+        return self.data.language
+
     def persist(self, data: BlueskyAuth | MastodonAuth | str) -> None:
         if not self.path.exists():
             self.path.parent.mkdir(exist_ok=True)

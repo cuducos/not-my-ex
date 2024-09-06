@@ -29,37 +29,37 @@ def user_cache_dir():
 def test_assert_auth_with_right_password():
     auth = Auth(PASSWORD)
     assert not auth.path.exists()
-    assert not auth.data.bluesky
-    assert not auth.data.mastodon
+    assert not auth.bluesky
+    assert not auth.mastodon
 
     auth.save_language(LANG)
     assert auth.path.exists()
-    assert auth.data.language == LANG
-    assert not auth.data.bluesky
-    assert not auth.data.mastodon
+    assert auth.language == LANG
+    assert not auth.bluesky
+    assert not auth.mastodon
 
     auth.save_bluesky_auth(BSKY_EMAIL, BSKY_PASSWORD)
-    assert auth.data.language == LANG
-    assert auth.data.bluesky.email == BSKY_EMAIL
-    assert auth.data.bluesky.password == BSKY_PASSWORD
-    assert auth.data.bluesky.agent == DEFAULT_BLUESKY_AGENT
-    assert not auth.data.mastodon
+    assert auth.language == LANG
+    assert auth.bluesky.email == BSKY_EMAIL
+    assert auth.bluesky.password == BSKY_PASSWORD
+    assert auth.bluesky.agent == DEFAULT_BLUESKY_AGENT
+    assert not auth.mastodon
 
     auth.save_mastodon_auth(MSTDN_TOKEN)
-    assert auth.data.language == LANG
-    assert auth.data.bluesky.email == BSKY_EMAIL
-    assert auth.data.bluesky.password == BSKY_PASSWORD
-    assert auth.data.bluesky.agent == DEFAULT_BLUESKY_AGENT
-    assert auth.data.mastodon.token == MSTDN_TOKEN
-    assert auth.data.mastodon.instance == DEFAULT_MASTODON_INSTANCE
+    assert auth.language == LANG
+    assert auth.bluesky.email == BSKY_EMAIL
+    assert auth.bluesky.password == BSKY_PASSWORD
+    assert auth.bluesky.agent == DEFAULT_BLUESKY_AGENT
+    assert auth.mastodon.token == MSTDN_TOKEN
+    assert auth.mastodon.instance == DEFAULT_MASTODON_INSTANCE
 
 
 def test_assert_auth_with_right_password_and_custom_instances():
     auth = Auth(PASSWORD)
     auth.save_bluesky_auth(BSKY_EMAIL, BSKY_PASSWORD, BSKY_AGENT)
     auth.save_mastodon_auth(MSTDN_TOKEN, MSTDN_INSTANCE)
-    assert auth.data.bluesky.agent == BSKY_AGENT
-    assert auth.data.mastodon.instance == MSTDN_INSTANCE
+    assert auth.bluesky.agent == BSKY_AGENT
+    assert auth.mastodon.instance == MSTDN_INSTANCE
 
 
 def test_assert_auth_wrong_password_attempt():
