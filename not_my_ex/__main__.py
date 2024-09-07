@@ -24,7 +24,7 @@ def register_gui_if_available(app):
     app.command()(gui)
 
 
-if __name__ == "__main__":
+def cli():
     app = Typer(
         name=f"not-my-ex {version('not_my_ex')}",
         help="not-my-ex posts micro blogging to Mastodon and Bluesky.",
