@@ -30,6 +30,8 @@ CLIENTS_AVAILABLE = set(
 
 LIMIT = 300 if BLUESKY in CLIENTS_AVAILABLE else 1024
 
+IMAGE_SIZE_LIMIT = 1024 * 1024 if BLUESKY in CLIENTS_AVAILABLE else None
+
 if not CLIENTS_AVAILABLE:
     raise EnvironmentVariableNotFoundError(
         "No clients available. Please set at least one of the following environment "

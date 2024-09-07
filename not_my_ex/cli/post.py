@@ -10,7 +10,7 @@ from not_my_ex.bluesky import Bluesky
 from not_my_ex.cli import error
 from not_my_ex.client import ClientError
 from not_my_ex.mastodon import Mastodon
-from not_my_ex.media import Media
+from not_my_ex.media import ImageTooBigError, Media
 from not_my_ex.post import Post, PostTooLongError
 from not_my_ex.settings import (
     BLUESKY,
@@ -57,7 +57,11 @@ async def main(
             text = await handler.read()
 
     load = tuple(media_from(path, not yes_to_all) for path in images)
-    imgs = await gather(*load)
+    try:
+        imgs = await gather(*load)
+    except ImageTooBigError as err:
+        error(err)
+
     post = Post(text, imgs or None, lang)
     if not lang and not yes_to_all:
         post.check_language()

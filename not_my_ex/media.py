@@ -1,9 +1,15 @@
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Optional
 
 from aiofiles import open, os
 
 from not_my_ex.mime import mime_for
+from not_my_ex.settings import IMAGE_SIZE_LIMIT
+
+
+class ImageTooBigError(Exception):
+    pass
 
 
 @dataclass
@@ -17,6 +23,9 @@ class Media:
     async def from_img(cls, img: str, alt: Optional[str] = None) -> "Media":
         if not await os.path.exists(img):
             raise ValueError(f"File {img} does not exist")
+
+        if IMAGE_SIZE_LIMIT and Path(img).stat().st_size > IMAGE_SIZE_LIMIT:
+            raise ImageTooBigError(f"{img} is larger than {IMAGE_SIZE_LIMIT} bytes")
 
         async with open(img, "rb") as handler:
             contents = await handler.read()

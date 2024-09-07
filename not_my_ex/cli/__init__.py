@@ -1,7 +1,7 @@
 from sys import stderr
 from typing import Optional, Union
 
-from typer import Exit, colors, echo, style
+from typer import colors, echo, style
 
 
 def error(err: Union[Exception, str], details: Optional[str] = None):
@@ -16,4 +16,4 @@ def error(err: Union[Exception, str], details: Optional[str] = None):
         msg += details
 
     echo(msg, file=stderr)
-    Exit(1)
+    exit(1)
