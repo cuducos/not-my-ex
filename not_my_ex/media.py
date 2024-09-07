@@ -5,7 +5,7 @@ from typing import Optional
 from aiofiles import open, os
 
 from not_my_ex.mime import mime_for
-from not_my_ex.settings import IMAGE_SIZE_LIMIT
+from not_my_ex.settings import image_size_limit
 
 
 class ImageTooBigError(Exception):
@@ -24,8 +24,9 @@ class Media:
         if not await os.path.exists(img):
             raise ValueError(f"File {img} does not exist")
 
-        if IMAGE_SIZE_LIMIT and Path(img).stat().st_size > IMAGE_SIZE_LIMIT:
-            raise ImageTooBigError(f"{img} is larger than {IMAGE_SIZE_LIMIT} bytes")
+        limit = image_size_limit()
+        if limit and Path(img).stat().st_size > limit:
+            raise ImageTooBigError(f"{img} is larger than {limit} bytes")
 
         async with open(img, "rb") as handler:
             contents = await handler.read()

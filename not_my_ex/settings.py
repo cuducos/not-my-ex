@@ -19,23 +19,31 @@ MASTODON_TOKEN = getenv("NOT_MY_EX_MASTODON_TOKEN")
 
 DEFAULT_LANG = getenv("NOT_MY_EX_DEFAULT_LANG")
 
-CLIENTS_AVAILABLE = set(
-    key
-    for key, value in (
-        (BLUESKY, BSKY_EMAIL and BSKY_PASSWORD),
-        (MASTODON, MASTODON_TOKEN),
+
+def clients_available():
+    return set(
+        key
+        for key, value in (
+            (BLUESKY, BSKY_EMAIL and BSKY_PASSWORD),
+            (MASTODON, MASTODON_TOKEN),
+        )
+        if value
     )
-    if value
-)
 
-LIMIT = 300 if BLUESKY in CLIENTS_AVAILABLE else 1024
 
-IMAGE_SIZE_LIMIT = 1024 * 1024 if BLUESKY in CLIENTS_AVAILABLE else None
+def limit():
+    return 300 if BLUESKY in clients_available() else 1024
 
-if not CLIENTS_AVAILABLE:
-    raise EnvironmentVariableNotFoundError(
-        "No clients available. Please set at least one of the following environment "
-        "variables:\n"
-        "- NOT_MY_EX_BSKY_EMAIL and NOT_MY_EX_BSKY_PASSWORD"
-        "- NOT_MY_EX_MASTODON_TOKEN"
-    )
+
+def image_size_limit():
+    return 1024 * 1024 if BLUESKY in clients_available() else None
+
+
+def assure_configured():
+    if not clients_available():
+        raise EnvironmentVariableNotFoundError(
+            "No clients available. Please set at least one of the following "
+            "environment variables:\n"
+            "- NOT_MY_EX_BSKY_EMAIL and NOT_MY_EX_BSKY_PASSWORD"
+            "- NOT_MY_EX_MASTODON_TOKEN"
+        )

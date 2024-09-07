@@ -10,7 +10,7 @@ from not_my_ex.post import Post
 
 
 def test_mastodon_client_raises_error_when_not_set():
-    with patch.object(settings, "CLIENTS_AVAILABLE", new_callable=set):
+    with patch.object(settings, "clients_available", return_value=set()):
         with raises(MastodonCredentialsNotFoundError):
             Mastodon(None)
 

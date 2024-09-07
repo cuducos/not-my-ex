@@ -1,6 +1,7 @@
 from base64 import urlsafe_b64encode
 from dataclasses import dataclass
-from os import urandom
+from importlib import reload
+from os import environ, urandom
 from pathlib import Path
 from pickle import dumps, loads
 from typing import Optional, Union
@@ -10,7 +11,7 @@ from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.hashes import SHA512
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
-from not_my_ex.settings import DEFAULT_BLUESKY_AGENT, DEFAULT_MASTODON_INSTANCE
+from not_my_ex import settings
 
 SALT_SIZE = 42
 
@@ -95,11 +96,42 @@ class Auth:
     ) -> None:
         assert email, "Email cannot be empty"
         assert password, "Password cannot be empty"
-        self.persist(BlueskyAuth(agent or DEFAULT_BLUESKY_AGENT, email, password))
+        self.persist(
+            BlueskyAuth(
+                agent or settings.DEFAULT_BLUESKY_AGENT,
+                email,
+                password,
+            )
+        )
 
     def save_mastodon_auth(self, token: str, instance: Optional[str] = None) -> None:
         assert token, "Token cannot be empty"
-        self.persist(MastodonAuth(instance or DEFAULT_MASTODON_INSTANCE, token))
+        self.persist(
+            MastodonAuth(
+                instance or settings.DEFAULT_MASTODON_INSTANCE,
+                token,
+            )
+        )
 
     def save_language(self, language: str) -> None:
         self.persist(language)
+
+    @classmethod
+    def load_to_env(cls, password: str) -> None:
+        if not cache().exists():
+            return
+
+        auth = cls(password)
+        if auth.language:
+            environ["DEFAULT_LANG"] = auth.language
+
+        if auth.bluesky:
+            environ["NOT_MY_EX_BSKY_AGENT"] = auth.bluesky.agent
+            environ["NOT_MY_EX_BSKY_EMAIL"] = auth.bluesky.email
+            environ["NOT_MY_EX_BSKY_PASSWORD"] = auth.bluesky.password
+
+        if auth.mastodon:
+            environ["NOT_MY_EX_MASTODON_INSTANCE"] = auth.mastodon.instance
+            environ["MNOT_MY_EX_MASTODON_TOKENSTODON_TOKEN"] = auth.mastodon.token
+
+        reload(settings)

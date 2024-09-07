@@ -25,7 +25,7 @@ class BlueskyCredentialsNotFoundError(Exception):
 
 class Bluesky(Client):
     def __init__(self, client: AsyncClient) -> None:
-        if settings.BLUESKY not in settings.CLIENTS_AVAILABLE:
+        if settings.BLUESKY not in settings.clients_available():
             raise BlueskyCredentialsNotFoundError(
                 "NOT_MY_EX_BSKY_EMAIL and/or NOT_MY_EX_BSKY_PASSWORD "
                 "environment variables not set"

@@ -4,8 +4,9 @@ from typing import Annotated, List, Optional
 
 from aiofiles import open, os
 from httpx import AsyncClient
-from typer import Option, echo, style
+from typer import Option, echo, prompt, style
 
+from not_my_ex.auth import Auth, cache
 from not_my_ex.bluesky import Bluesky
 from not_my_ex.cli import error
 from not_my_ex.client import ClientError
@@ -14,15 +15,16 @@ from not_my_ex.media import ImageTooBigError, Media
 from not_my_ex.post import Post, PostTooLongError
 from not_my_ex.settings import (
     BLUESKY,
-    CLIENTS_AVAILABLE,
     DEFAULT_LANG,
     MASTODON,
+    assure_configured,
+    clients_available,
 )
 
 CLIENTS = {BLUESKY: Bluesky, MASTODON: Mastodon}
 
 
-async def post_and_print_url(key: str, http: AsyncClient, post: Post) -> None:
+async def post_and_print(key: str, http: AsyncClient, post: Post) -> None:
     try:
         cls = CLIENTS[key]
     except KeyError:
@@ -67,7 +69,7 @@ async def main(
         post.check_language()
 
     async with AsyncClient() as http:
-        tasks = tuple(post_and_print_url(key, http, post) for key in CLIENTS_AVAILABLE)
+        tasks = tuple(post_and_print(key, http, post) for key in clients_available())
         await gather(*tasks)
 
 
@@ -95,6 +97,15 @@ def post(
 ) -> None:
     """Post content. TEXT can be the post text itself, or the path to a text file."""
     loop = get_event_loop()
+    if cache().exists():
+        not_my_ex = style("not-my-ex", bold=True)
+        password = prompt(
+            f"Please, enter the password you used to configure {not_my_ex}",
+            hide_input=True,
+        )
+        Auth.load_to_env(password)
+
+    assure_configured()
     try:
         loop.run_until_complete(main(text, images, lang, yes_to_all))
     except PostTooLongError as err:

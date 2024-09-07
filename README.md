@@ -60,7 +60,7 @@ If you want to use the [GUI](https://en.wikipedia.org/wiki/Graphical_user_interf
 ### CLI
 
 ```console
-$ not-my-ex "Magic, madness, heaven, sin" --images /tmp/1989.gif
+$ not-my-ex post "Magic, madness, heaven, sin" --images /tmp/1989.gif
 ```
 
 You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --images swift.gif`).
@@ -70,7 +70,7 @@ You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --im
 If you have installed the GUI extra:
 
 ```console
-$ not-my-ex-gui
+$ not-my-ex gui
 ```
 
 This is how it looks like:

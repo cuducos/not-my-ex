@@ -37,12 +37,13 @@ from not_my_ex.client import ClientError
 from not_my_ex.mastodon import Mastodon
 from not_my_ex.media import Media
 from not_my_ex.post import Post
-from not_my_ex.settings import BLUESKY, CLIENTS_AVAILABLE, DEFAULT_LANG, LIMIT, MASTODON
+from not_my_ex.settings import BLUESKY, DEFAULT_LANG, MASTODON, clients_available, limit
 
+LIMIT = limit()
 CLIENTS = {
     key: value
     for key, value in ((BLUESKY, Bluesky), (MASTODON, Mastodon))
-    if key in CLIENTS_AVAILABLE
+    if key in clients_available()
 }
 BLACK = Colour(0, 0, 0)
 RED = Colour(128, 0, 0)

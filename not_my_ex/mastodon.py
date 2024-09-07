@@ -20,7 +20,7 @@ class MastodonCredentialsNotFoundError(Exception):
 
 class Mastodon(Client):
     def __init__(self, client: AsyncClient) -> None:
-        if settings.MASTODON not in settings.CLIENTS_AVAILABLE:
+        if settings.MASTODON not in settings.clients_available():
             raise MastodonCredentialsNotFoundError(
                 "NOT_MY_EX_MASTODON_TOKEN environment variables not set"
             )

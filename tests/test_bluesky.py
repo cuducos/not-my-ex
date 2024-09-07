@@ -12,7 +12,7 @@ from not_my_ex.post import Post
 
 @mark.asyncio
 async def test_bluesky_client_raises_error_when_not_set():
-    with patch.object(settings, "CLIENTS_AVAILABLE", new_callable=set):
+    with patch.object(settings, "clients_available", return_value=set()):
         with raises(BlueskyCredentialsNotFoundError):
             async with AsyncClient() as client:
                 Bluesky(client)
