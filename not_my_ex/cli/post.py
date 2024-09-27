@@ -1,4 +1,5 @@
 from asyncio import gather, get_event_loop
+from collections import namedtuple
 from sys import stderr
 from typing import Annotated, List, Optional
 
@@ -23,8 +24,10 @@ from not_my_ex.settings import (
 
 CLIENTS = {BLUESKY: Bluesky, MASTODON: Mastodon}
 
+Sent = namedtuple("Sent", "url client emoji")
 
-async def post_and_print(key: str, http: AsyncClient, post: Post) -> None:
+
+async def send(key: str, http: AsyncClient, post: Post) -> Optional[Sent]:
     try:
         cls = CLIENTS[key]
     except KeyError:
@@ -35,9 +38,9 @@ async def post_and_print(key: str, http: AsyncClient, post: Post) -> None:
         url = await cls(http).post(post)
     except ClientError as exc:
         print(str(exc), file=stderr)
-        return
+        return None
 
-    echo(f"{client.emoji} {style(client.name, bold=True)} {url}")
+    return Sent(url, client.name, client.emoji)
 
 
 async def media_from(path: str, ask_for_alt_text: bool) -> Media:
@@ -69,8 +72,12 @@ async def main(
         post.check_language()
 
     async with AsyncClient() as http:
-        tasks = tuple(post_and_print(key, http, post) for key in clients_available())
-        await gather(*tasks)
+        tasks = tuple(send(key, http, post) for key in clients_available())
+        posts = await gather(*tasks)
+
+    for sent in posts:
+        if sent:
+            echo(f"{sent.emoji} {style(sent.client, bold=True)} {sent.url}")
 
 
 def post(
