@@ -30,9 +30,10 @@ class Post:
             self.lang = detector.detect(self.text).language
 
     def check_language(self):
-        answer = input(f"Is the post language {self.lang}? [y/n] ")
-        if answer.lower() == "y":
-            return
+        if self.lang:
+            answer = input(f"Is the post language {self.lang}? [y/n] ")
+            if answer.lower() == "y":
+                return
 
         lang = Language()
         lang.ask()
