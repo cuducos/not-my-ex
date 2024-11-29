@@ -1,13 +1,12 @@
 [project]
 name = "not-my-ex"
-version = "0.1.1"
+version = "1.0.0"
 description = "Tiny CLI to post simultaneously to Mastodon and Bluesky"
 authors = [{name = "Eduardo Cuducos", email = "4732915+cuducos@users.noreply.github.com"}]
 license = {file = "LICENSE"}
 readme = "README.md"
 requires-python = ">=3.9,<3.14"
 classifiers = [
-    "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
     "Programming Language :: Python :: 3.9",
