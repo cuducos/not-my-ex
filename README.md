@@ -5,13 +5,16 @@ Tiny app to post simultaneously to Mastodon and Bluesky.
 <small>Obviously, based on [`cuducos/from-my-ex`](https://github.com/cuducos/from-my-ex).</small>
 
 It supports:
-* Post status updates to both networks with a simple CLI command or GUI interface
+* Post status updates to both networks with a simple CLI command
 * Posting with images
 * Including alt text for images
 * Setting post language
 
 It does not support:
 * Tagging other users (they would have different IDs and servers in each platform)
+
+It used to have:
+* A simple [GUI](https://en.wikipedia.org/wiki/Graphical_user_interface) (version 0.1.1), but dropped support to focus on CLI — there are other great GUI out there by now
 
 ## Getting started
 
@@ -53,8 +56,6 @@ Not setting `NOT_MY_EX_MASTODON_TOKEN` disables posting to Mastodon.
 $ pip install not-my-ex
 ```
 
-If you want to use the [GUI](https://en.wikipedia.org/wiki/Graphical_user_interface), `pip install not-my-ex[gui]`.
-
 ## Usage
 
 ### CLI
@@ -64,18 +65,6 @@ $ not-my-ex post "Magic, madness, heaven, sin" --images /tmp/1989.gif
 ```
 
 You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --images swift.gif`).
-
-### GUI
-
-If you have installed the GUI extra:
-
-```console
-$ not-my-ex gui
-```
-
-This is how it looks like:
-
-![Screenshot of `not-my-ex` GUI](gui.png)
 
 ### API
 
