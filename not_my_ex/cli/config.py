@@ -30,8 +30,7 @@ def clean() -> None:
 
 
 def config() -> None:
-    """Prompt to save authentication credentials and language preferences (not used for
-    the GUI yet)."""
+    """Prompt to save authentication credentials and language preferences."""
     path = cache()
     not_my_ex = style("not-my-ex", bold=True)
     discouraged = style("highly discouraged", bold=True)
