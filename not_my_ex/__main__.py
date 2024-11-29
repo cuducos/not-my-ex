@@ -4,9 +4,9 @@ from importlib.metadata import version
 
 from typer import Typer
 
+from not_my_ex.auth import EnvAuth
 from not_my_ex.cli.config import clean, config
 from not_my_ex.cli.post import post
-from not_my_ex.settings import assure_configured
 
 
 def register_gui_if_available(app):
@@ -17,7 +17,8 @@ def register_gui_if_available(app):
 
     def gui() -> None:
         """Opens the GUI to creaet and post."""
-        assure_configured()
+        auth = EnvAuth()
+        auth.assure_configured()
         loop = get_event_loop()
         loop.run_until_complete(module.gui)
 

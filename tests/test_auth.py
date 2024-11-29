@@ -5,7 +5,7 @@ from unittest.mock import patch
 from cryptography.fernet import InvalidToken
 from pytest import fixture, raises
 
-from not_my_ex.auth import Auth
+from not_my_ex.auth import EncryptedAuth
 from not_my_ex.settings import DEFAULT_BLUESKY_AGENT, DEFAULT_MASTODON_INSTANCE
 
 PASSWORD = "forty2"
@@ -27,7 +27,7 @@ def user_cache_dir():
 
 
 def test_assert_auth_with_right_password():
-    auth = Auth(PASSWORD)
+    auth = EncryptedAuth(PASSWORD)
     assert not auth.path.exists()
     assert not auth.bluesky
     assert not auth.mastodon
@@ -38,14 +38,14 @@ def test_assert_auth_with_right_password():
     assert not auth.bluesky
     assert not auth.mastodon
 
-    auth.save_bluesky_auth(BSKY_EMAIL, BSKY_PASSWORD)
+    auth.save_bluesky(BSKY_EMAIL, BSKY_PASSWORD)
     assert auth.language == LANG
     assert auth.bluesky.email == BSKY_EMAIL
     assert auth.bluesky.password == BSKY_PASSWORD
     assert auth.bluesky.agent == DEFAULT_BLUESKY_AGENT
     assert not auth.mastodon
 
-    auth.save_mastodon_auth(MSTDN_TOKEN)
+    auth.save_mastodon(MSTDN_TOKEN)
     assert auth.language == LANG
     assert auth.bluesky.email == BSKY_EMAIL
     assert auth.bluesky.password == BSKY_PASSWORD
@@ -55,17 +55,17 @@ def test_assert_auth_with_right_password():
 
 
 def test_assert_auth_with_right_password_and_custom_instances():
-    auth = Auth(PASSWORD)
-    auth.save_bluesky_auth(BSKY_EMAIL, BSKY_PASSWORD, BSKY_AGENT)
-    auth.save_mastodon_auth(MSTDN_TOKEN, MSTDN_INSTANCE)
+    auth = EncryptedAuth(PASSWORD)
+    auth.save_bluesky(BSKY_EMAIL, BSKY_PASSWORD, BSKY_AGENT)
+    auth.save_mastodon(MSTDN_TOKEN, MSTDN_INSTANCE)
     assert auth.bluesky.agent == BSKY_AGENT
     assert auth.mastodon.instance == MSTDN_INSTANCE
 
 
 def test_assert_auth_wrong_password_attempt():
-    auth = Auth(PASSWORD)
-    auth.save_bluesky_auth(BSKY_EMAIL, BSKY_PASSWORD, BSKY_AGENT)
-    auth.save_mastodon_auth(MSTDN_TOKEN, MSTDN_INSTANCE)
+    auth = EncryptedAuth(PASSWORD)
+    auth.save_bluesky(BSKY_EMAIL, BSKY_PASSWORD, BSKY_AGENT)
+    auth.save_mastodon(MSTDN_TOKEN, MSTDN_INSTANCE)
 
     with raises(InvalidToken):
-        Auth("admin")
+        EncryptedAuth("admin")

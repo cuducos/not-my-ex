@@ -1,7 +1,6 @@
 from base64 import urlsafe_b64encode
 from dataclasses import dataclass
-from importlib import reload
-from os import environ, urandom
+from os import getenv, urandom
 from pathlib import Path
 from pickle import dumps, loads
 from typing import Optional, Union
@@ -40,6 +39,61 @@ class AuthData:
     language: Optional[str] = None
 
 
+class EnvironmentVariableNotFoundError(Exception): ...
+
+
+class Auth:
+    def __init__(self):
+        self.data = AuthData()
+
+    def for_client(self, key):
+        if key == settings.BLUESKY:
+            return self.bluesky
+        if key == settings.MASTODON:
+            return self.mastodon
+        raise ValueError("Invalid client")
+
+    @property
+    def bluesky(self) -> Optional[BlueskyAuth]:
+        return self.data.bluesky
+
+    @property
+    def mastodon(self) -> Optional[MastodonAuth]:
+        return self.data.mastodon
+
+    @property
+    def language(self) -> Optional[str]:
+        return self.data.language
+
+    @property
+    def clients(self):
+        clients = (
+            (settings.BLUESKY, self.bluesky is not None),
+            (settings.MASTODON, self.mastodon is not None),
+        )
+        return tuple(key for key, configured in clients if configured)
+
+    def assure_configured(self):
+        if not self.clients:
+            raise EnvironmentVariableNotFoundError(
+                "No clients available. Please set at least one of the following "
+                "environment variables (or run `not-my-ex config`):\n"
+                "- NOT_MY_EX_BSKY_EMAIL and NOT_MY_EX_BSKY_PASSWORD"
+                "- NOT_MY_EX_MASTODON_TOKEN"
+            )
+
+    @property
+    def limit(self):
+        if self.bluesky:
+            return 300
+        return 1024
+
+    @property
+    def image_size_limit(self):
+        if self.bluesky:
+            return 1024 * 1024
+
+
 class FernetWithPassword(Fernet):
     def __init__(self, password: bytes, salt: bytes) -> None:
         kdf = PBKDF2HMAC(algorithm=SHA512(), length=32, salt=salt, iterations=2**19)
@@ -47,7 +101,7 @@ class FernetWithPassword(Fernet):
         super().__init__(key)
 
 
-class Auth:
+class EncryptedAuth(Auth):
     """This class manages authentication information (API tokens, logins, etc.) stored
     locally in an encrypted password-protected file."""
 
@@ -64,18 +118,6 @@ class Auth:
             self.algorithm = FernetWithPassword(password.encode("utf-8"), self.salt)
             self.data = AuthData()
 
-    @property
-    def bluesky(self) -> Optional[BlueskyAuth]:
-        return self.data.bluesky
-
-    @property
-    def mastodon(self) -> Optional[MastodonAuth]:
-        return self.data.mastodon
-
-    @property
-    def language(self) -> Optional[str]:
-        return self.data.language
-
     def persist(self, data: Union[BlueskyAuth, MastodonAuth, str]) -> None:
         if not self.path.exists():
             self.path.parent.mkdir(exist_ok=True)
@@ -91,7 +133,7 @@ class Auth:
             cursor.write(self.salt)
             cursor.write(self.algorithm.encrypt(dumps(self.data)))
 
-    def save_bluesky_auth(
+    def save_bluesky(
         self, email: str, password: str, agent: Optional[str] = None
     ) -> None:
         assert email, "Email cannot be empty"
@@ -104,7 +146,7 @@ class Auth:
             )
         )
 
-    def save_mastodon_auth(self, token: str, instance: Optional[str] = None) -> None:
+    def save_mastodon(self, token: str, instance: Optional[str] = None) -> None:
         assert token, "Token cannot be empty"
         self.persist(
             MastodonAuth(
@@ -116,22 +158,32 @@ class Auth:
     def save_language(self, language: str) -> None:
         self.persist(language)
 
-    @classmethod
-    def load_to_env(cls, password: str) -> None:
-        if not cache().exists():
-            return
 
-        auth = cls(password)
-        if auth.language:
-            environ["DEFAULT_LANG"] = auth.language
+class EnvAuth(Auth):
+    """This class offers the same `Auth` API but loading credentials from environment
+    variables instead."""
 
-        if auth.bluesky:
-            environ["NOT_MY_EX_BSKY_AGENT"] = auth.bluesky.agent
-            environ["NOT_MY_EX_BSKY_EMAIL"] = auth.bluesky.email
-            environ["NOT_MY_EX_BSKY_PASSWORD"] = auth.bluesky.password
+    def __init__(self) -> None:
+        self.data = AuthData()
+        self.data.language = getenv("NOT_MY_EX_DEFAULT_LANG")
 
-        if auth.mastodon:
-            environ["NOT_MY_EX_MASTODON_INSTANCE"] = auth.mastodon.instance
-            environ["MNOT_MY_EX_MASTODON_TOKENSTODON_TOKEN"] = auth.mastodon.token
+        bluesky_agent = getenv("NOT_MY_EX_BSKY_AGENT", settings.DEFAULT_BLUESKY_AGENT)
+        bluesky_email = getenv("NOT_MY_EX_BSKY_EMAIL", "")
+        bluesky_password = getenv("NOT_MY_EX_BSKY_PASSWORD", "")
+        if all((bluesky_agent, bluesky_email, bluesky_password)):
+            self.data.bluesky = BlueskyAuth(
+                bluesky_agent, bluesky_email, bluesky_password
+            )
 
-        reload(settings)
+        mastodon_token = getenv("NOT_MY_EX_MASTODON_TOKEN", "")
+        mastodon_instance = getenv(
+            "NOT_MY_EX_MASTODON_INSTANCE", settings.DEFAULT_MASTODON_INSTANCE
+        )
+        if all((mastodon_instance, mastodon_token)):
+            self.data.mastodon = MastodonAuth(mastodon_instance, mastodon_token)
+
+
+def authenticate(password: Optional[str] = None) -> Auth:
+    if password and cache().exists():
+        return EncryptedAuth(password)
+    return EnvAuth()

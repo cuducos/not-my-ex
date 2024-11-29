@@ -5,13 +5,15 @@ from tempfile import NamedTemporaryFile
 
 from pytest import fixture
 
+from not_my_ex.auth import EnvAuth
+
 ONE_PIXEL_IMAGE = (
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQIW2NgAAIAAAUAAR4"
     "f7BQAAAAASUVORK5CYII="
 )
 SETTINGS = {
     "BSKY_EMAIL": "python@mailinator.com",
-    "BSKY_PASSWORD": "fourty2",
+    "BSKY_PASSWORD": "forty2",
     "MASTODON_TOKEN": "40two",
 }
 
@@ -29,3 +31,8 @@ def image():
         path = Path(tmp.name)
         path.write_bytes(content)
         yield (path, content)
+
+
+@fixture
+def auth():
+    return EnvAuth()

@@ -5,7 +5,6 @@ from eld import LanguageDetector  # type: ignore
 
 from not_my_ex.language import Language
 from not_my_ex.media import Media
-from not_my_ex.settings import limit
 
 
 class PostTooLongError(Exception):
@@ -15,13 +14,14 @@ class PostTooLongError(Exception):
 @dataclass
 class Post:
     text: str
+    limit: int = 300
     media: Optional[Iterable[Media]] = None
     lang: Optional[str] = None
 
     def __post_init__(self):
-        if len(self.text) > limit():
+        if len(self.text) > self.limit:
             raise PostTooLongError(
-                f"Text cannot be longer than {limit()} characters. This text is "
+                f"Text cannot be longer than {self.limit} characters. This text is "
                 f"{len(self.text)} characters long."
             )
 

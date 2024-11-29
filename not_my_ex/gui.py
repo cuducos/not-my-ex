@@ -32,19 +32,11 @@ from wx import (
 )
 from wxasync import AsyncBind, WxAsyncApp  # type: ignore
 
-from not_my_ex.bluesky import Bluesky
+from not_my_ex.auth import EnvAuth
 from not_my_ex.client import ClientError
-from not_my_ex.mastodon import Mastodon
 from not_my_ex.media import Media
 from not_my_ex.post import Post
-from not_my_ex.settings import BLUESKY, DEFAULT_LANG, MASTODON, clients_available, limit
 
-LIMIT = limit()
-CLIENTS = {
-    key: value
-    for key, value in ((BLUESKY, Bluesky), (MASTODON, Mastodon))
-    if key in clients_available()
-}
 BLACK = Colour(0, 0, 0)
 RED = Colour(128, 0, 0)
 BORDER = 10
@@ -52,12 +44,17 @@ BORDER = 10
 
 class NotMyExFrame(Frame):
     def __init__(self, http, *args, **kwargs) -> None:
-        self.clients = {key: cls(http) for key, cls in CLIENTS.items()}
+        auth = EnvAuth()
+        self.clients = {
+            key: cls(http, auth.for_client(key)) for key, cls in auth.clients
+        }
+        self.limit = auth.limit
+        self.image_size_limit = auth.image_size_limit
         self.labels = " & ".join(c.name for c in self.clients.values())
         super(NotMyExFrame, self).__init__(*args, **kwargs)
         panel = Panel(self)
         self.post = TextCtrl(panel, style=TE_MULTILINE)
-        self.chars = StaticText(panel, label=f"0/{LIMIT}")
+        self.chars = StaticText(panel, label=f"0/{self.limit}")
         self.images = tuple(
             FilePickerCtrl(
                 panel,
@@ -66,7 +63,7 @@ class NotMyExFrame(Frame):
             for _ in range(4)
         )
         self.alts = tuple(TextCtrl(panel, size=(50, -1)) for _ in range(4))
-        self.lang = TextCtrl(panel, value=DEFAULT_LANG or "", size=(50, -1))
+        self.lang = TextCtrl(panel, value=auth.language or "", size=(50, -1))
         self.button = Button(panel, label=f"Post to {self.labels}".replace("&", "&&"))
         self.button.Disable()
 
@@ -126,7 +123,7 @@ class NotMyExFrame(Frame):
 
     async def media(self) -> Optional[Iterable[Media]]:
         imgs = tuple(
-            Media.from_img(path, alt.GetValue() or None)
+            Media.from_img(path, alt.GetValue() or None, self.image_size_limit)
             for img, alt in zip(self.images, self.alts)
             if (path := img.GetPath())
         )
@@ -136,8 +133,8 @@ class NotMyExFrame(Frame):
 
     def when_typing(self, event) -> None:
         text = self.post.GetValue()
-        self.chars.SetLabel(f"{len(text)}/{LIMIT}")
-        if len(text) > LIMIT:
+        self.chars.SetLabel(f"{len(text)}/{self.limit}")
+        if len(text) > self.limit:
             self.chars.SetForegroundColour(RED)
         else:
             self.chars.SetForegroundColour(BLACK)
@@ -146,7 +143,7 @@ class NotMyExFrame(Frame):
     def validate(self, _) -> bool:
         text = self.post.GetValue()
         lang = self.lang.GetValue()
-        text_is_valid = 0 < len(text) < LIMIT
+        text_is_valid = 0 < len(text) < self.limit
         if (text_is_valid or self.has_media) and len(lang) == 2:
             self.button.Enable()
             return True
@@ -165,7 +162,8 @@ class NotMyExFrame(Frame):
         media = await self.media()
         lang = self.lang.GetValue()
         tasks = tuple(
-            client.post(Post(text, media, lang)) for client in self.clients.values()
+            client.post(Post(text, self.limit, media, lang))
+            for client in self.clients.values()
         )
 
         try:

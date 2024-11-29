@@ -4,7 +4,7 @@ from io import BytesIO
 from backoff import expo, on_exception
 from httpx import AsyncClient, Response
 
-from not_my_ex import settings
+from not_my_ex.auth import MastodonAuth
 from not_my_ex.client import Client
 from not_my_ex.media import Media
 from not_my_ex.post import Post
@@ -19,23 +19,20 @@ class MastodonCredentialsNotFoundError(Exception):
 
 
 class Mastodon(Client):
-    def __init__(self, client: AsyncClient) -> None:
-        if settings.MASTODON not in settings.clients_available():
-            raise MastodonCredentialsNotFoundError(
-                "NOT_MY_EX_MASTODON_TOKEN environment variables not set"
-            )
-        self.headers = {"Authorization": f"Bearer {settings.MASTODON_TOKEN}"}
+    def __init__(self, client: AsyncClient, auth: MastodonAuth) -> None:
+        self.instance = auth.instance
+        self.headers = {"Authorization": f"Bearer {auth.token}"}
         super().__init__(client)
 
     async def request(self, path: str, **kwargs) -> Response:
         return await self.client.post(
-            f"{settings.MASTODON_INSTANCE}{path}", headers=self.headers, **kwargs
+            f"{self.instance}{path}", headers=self.headers, **kwargs
         )
 
     @on_exception(expo, MediaNotReadyError, max_tries=42)
     async def wait_media_processing(self, media_id) -> None:
         resp = await self.client.get(
-            f"{settings.MASTODON_INSTANCE}/api/v1/media/{media_id}",
+            f"{self.instance}/api/v1/media/{media_id}",
             headers=self.headers,
         )
         if resp.status_code != 200:

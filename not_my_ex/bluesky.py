@@ -6,7 +6,7 @@ from string import punctuation
 from backoff import expo, on_exception
 from httpx import AsyncClient, ReadTimeout, Response
 
-from not_my_ex import settings
+from not_my_ex.auth import BlueskyAuth
 from not_my_ex.card import Card
 from not_my_ex.client import Client
 from not_my_ex.media import Media
@@ -24,24 +24,16 @@ class BlueskyCredentialsNotFoundError(Exception):
 
 
 class Bluesky(Client):
-    def __init__(self, client: AsyncClient) -> None:
-        if settings.BLUESKY not in settings.clients_available():
-            raise BlueskyCredentialsNotFoundError(
-                "NOT_MY_EX_BSKY_EMAIL and/or NOT_MY_EX_BSKY_PASSWORD "
-                "environment variables not set"
-            )
-
-        self.credentials = {
-            "identifier": settings.BSKY_EMAIL,
-            "password": settings.BSKY_PASSWORD,
-        }
+    def __init__(self, client: AsyncClient, auth: BlueskyAuth) -> None:
+        self.agent = auth.agent
+        self.credentials = {"identifier": auth.email, "password": auth.password}
         self.token, self.did, self.handle = None, None, None
         self.is_authenticated = False
         super().__init__(client)
 
     async def auth(self) -> None:
         resp = await self.client.post(
-            f"{settings.BSKY_AGENT}/xrpc/com.atproto.server.createSession",
+            f"{self.agent}/xrpc/com.atproto.server.createSession",
             json=self.credentials,
         )
         if resp.status_code != 200:
@@ -59,7 +51,7 @@ class Bluesky(Client):
     async def xrpc(self, resource: str, **kwargs) -> Response:
         headers = kwargs.pop("headers", {})
         headers["Authorization"] = f"Bearer {self.token}"
-        url = f"{settings.BSKY_AGENT}/xrpc/{resource}"
+        url = f"{self.agent}/xrpc/{resource}"
         return await self.client.post(url, headers=headers, **kwargs)
 
     async def upload(self, media: Media) -> dict:

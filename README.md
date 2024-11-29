@@ -84,6 +84,7 @@ from asyncio import gather
 
 from httpx import AsyncClient
 
+from not_my_ex.auth import EnvAuth
 from not_my_ex.bluesky import Bluesky
 from not_my_ex.mastodon import Mastodon
 from not_my_ex.media import Media
@@ -91,19 +92,22 @@ from not_my_ex.post import Post
 
 
 async def main():
+    auth = EnvAuth()
     media_tasks = tuple(
-        Media.from_img(path, alt=alt)
+        Media.from_img(path, alt, auth.image_size_limit)
         for path, alt in (("taylor.jpg", "Taylor"), ("swift.jpg", "Swift"))
     )
     media = await gather(*media_tasks)
 
-    post = Post(text="Magic, madness, heaven, sin", media=media, lang="en")
+    post = Post("Magic, madness, heaven, sin", auth.limitm, media, "en")
     async with AsyncClient() as http:
         post_tasks = tuple(cls(http).post(post) for cls in (Bluesky, Mastodon))
         await gather(*post_tasks)
 ```
 
-In `Post`, both `media` and `lang` are optional. In `Media`, `alt` is optional.
+In `Post`, `limit`, `media` and `lang` are optional. In `Media`, both `alt` and `image_size_limit` are optional.
+
+The usage of `auth.limit` and `auth.image_size_limit` makes sure the limits are set according to the authenticated clients.
 
 ## Contributing
 
