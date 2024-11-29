@@ -29,7 +29,7 @@ async def send(key: str, http: AsyncClient, auth: Auth, post: Post) -> Optional[
 
     client = cls(http, auth.for_client(key))
     try:
-        url = await cls(http).post(post)
+        url = await client.post(post)
     except ClientError as exc:
         print(str(exc), file=stderr)
         return None
