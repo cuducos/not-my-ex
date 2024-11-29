@@ -143,7 +143,7 @@ class Bluesky(Client):
                         "features": [
                             {
                                 "$type": "app.bsky.richtext.facet#tag",
-                                "tag": hashtag,
+                                "tag": hashtag.removeprefix("#"),
                             }
                         ],
                     }

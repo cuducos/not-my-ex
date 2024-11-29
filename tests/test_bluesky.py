@@ -150,7 +150,7 @@ async def test_bluesky_client_post_data_includes_urls_and_hashtag_in_facets(auth
             "features": [
                 {
                     "$type": "app.bsky.richtext.facet#tag",
-                    "tag": "#share",
+                    "tag": "share",
                 },
             ],
             "index": {
