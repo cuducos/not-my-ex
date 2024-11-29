@@ -94,6 +94,12 @@ def post(
             help="Do not ask for alt text for images and/or post language confirmation",
         ),
     ] = False,
+    skip_bluesky: Annotated[
+        bool, Option("--skip-bluesky", help="Skip posting to Bluesky")
+    ] = False,
+    skip_mastodon: Annotated[
+        bool, Option("--skip-mastodon", help="Skip posting to Mastodon")
+    ] = False,
 ) -> None:
     """Post content. TEXT can be the post text itself, or the path to a text file."""
     loop = get_event_loop()
@@ -107,6 +113,10 @@ def post(
         )
 
     auth = authenticate(password)
+    if skip_bluesky:
+        auth.invalidate(BLUESKY)
+    if skip_mastodon:
+        auth.invalidate(MASTODON)
     auth.assure_configured()
 
     try:

@@ -53,6 +53,12 @@ class Auth:
             return self.mastodon
         raise ValueError("Invalid client")
 
+    def invalidate(self, key):
+        if key == settings.BLUESKY:
+            self.data.bluesky = None
+        if key == settings.MASTODON:
+            self.data.mastodon = None
+
     @property
     def bluesky(self) -> Optional[BlueskyAuth]:
         return self.data.bluesky
