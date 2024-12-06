@@ -5,15 +5,18 @@ Tiny app to post simultaneously to Mastodon and Bluesky.
 <small>Obviously, based on [`cuducos/from-my-ex`](https://github.com/cuducos/from-my-ex).</small>
 
 It supports:
+
 * Post status updates to both networks with a simple CLI command
 * Posting with images
 * Including alt text for images
 * Setting post language
 
 It does not support:
+
 * Tagging other users (they would have different IDs and servers in each platform)
 
 It used to have:
+
 * A simple [GUI](https://en.wikipedia.org/wiki/Graphical_user_interface) (version 0.1.1), but dropped support to focus on CLI — there are other great GUI out there by now
 
 ## Getting started
@@ -64,7 +67,7 @@ $ pip install not-my-ex
 $ not-my-ex post "Magic, madness, heaven, sin" --images /tmp/1989.gif
 ```
 
-You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --images swift.gif`).
+You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --images swift.gif`). Check `--help` for more details on commands and subcommands.
 
 ### API
 
@@ -103,5 +106,5 @@ The usage of `auth.limit` and `auth.image_size_limit` makes sure the limits are 
 Requires [`uv`](https://docs.astral.sh/uv) Python package manager. The tests include [Ruff](https://docs.astral.sh/ruff/) and [Mypy](https://www.mypy-lang.org/):
 
 ```console
-$ uv run python -m pytest
+$ uv run pytest
 ```
