@@ -16,3 +16,7 @@ def cli():
     app.command()(clean)
     app.command()(config)
     app()
+
+
+if __name__ == "__main__":
+    cli()

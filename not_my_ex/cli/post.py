@@ -1,11 +1,15 @@
 from asyncio import gather, get_event_loop
 from collections import namedtuple
+from os import getenv
+from pathlib import Path
+from subprocess import call
 from sys import stderr
+from tempfile import NamedTemporaryFile
 from typing import Annotated, List, Optional
 
 from aiofiles import open, os
 from httpx import AsyncClient
-from typer import Option, echo, prompt, style
+from typer import Argument, Option, echo, prompt, style
 
 from not_my_ex.auth import Auth, authenticate, cache
 from not_my_ex.bluesky import Bluesky
@@ -73,8 +77,22 @@ async def main(
             echo(f"{sent.emoji} {style(sent.client, bold=True)} {sent.url}")
 
 
+def editor():
+    with NamedTemporaryFile(prefix="not-my-ex-post", suffix=".txt") as tmp:
+        call((getenv("EDITOR", "vim"), tmp.name))
+        text = Path(tmp.name).read_text().strip()
+    return text
+
+
 def post(
-    text: str,
+    text: str = Argument(
+        None,
+        help=(
+            "Text to post or path to a text file containing the content to post. "
+            "If left blank, an editor (`EDITOR` environment variable) will open "
+            "for you to type the post."
+        ),
+    ),
     images: Annotated[
         List[str], Option("--images", "-i", help="Path to the images to post (max. 4)")
     ] = [],
@@ -103,6 +121,7 @@ def post(
 ) -> None:
     """Post content. TEXT can be the post text itself, or the path to a text file."""
     loop = get_event_loop()
+    text = text or editor()
 
     password = None
     if cache().exists():
