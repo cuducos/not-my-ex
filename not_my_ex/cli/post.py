@@ -122,6 +122,8 @@ def post(
     """Post content. TEXT can be the post text itself, or the path to a text file."""
     loop = get_event_loop()
     text = text or editor()
+    if not text:
+        error("No text to post")
 
     password = None
     if cache().exists():
