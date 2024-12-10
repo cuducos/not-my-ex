@@ -1,6 +1,6 @@
 [project]
 name = "not-my-ex"
-version = "1.1.0"
+version = "1.1.1"
 description = "Tiny CLI to post simultaneously to Mastodon and Bluesky"
 authors = [{name = "Eduardo Cuducos", email = "4732915+cuducos@users.noreply.github.com"}]
 license = {file = "LICENSE"}
