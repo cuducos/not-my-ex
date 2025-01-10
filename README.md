@@ -25,6 +25,10 @@ It used to have:
 
 * Python 3.9 or newer
 
+<details>
+
+<summary>Optionally, you can set some environment variables, but you don't have to.</summary>
+
 #### Environment variables
 
 ##### General settings
@@ -53,6 +57,8 @@ Not setting `NOT_MY_EX_BSKY_EMAIL` **or** `NOT_MY_EX_BSKY_PASSWORD` disables pos
 
 Not setting `NOT_MY_EX_MASTODON_TOKEN` disables posting to Mastodon.
 
+</details>
+
 ## Install
 
 ```console
@@ -67,7 +73,11 @@ $ pip install not-my-ex
 $ not-my-ex post "Magic, madness, heaven, sin" --images /tmp/1989.gif
 ```
 
-You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --images swift.gif`). Check `--help` for more details on commands and subcommands.
+You can skip the post text; in that case, it will open `$EDITOR` so you can write your post.
+
+You can skip `--images` or pass multiple images  (e.g. `--images taylor.jpg --images swift.gif`).
+
+Check `--help` for more details on commands and subcommand.
 
 ### API
 
