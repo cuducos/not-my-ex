@@ -45,6 +45,7 @@ dev-dependencies = [
 
 [tool.pytest.ini_options]
 addopts = "--ruff --ruff-format --mypy --pdbcls=IPython.terminal.debugger:Pdb"
+asyncio_default_fixture_loop_scope = "module"
 
 [tool.ruff.lint]
 select = ["E", "F", "I"]

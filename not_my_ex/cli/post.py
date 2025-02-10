@@ -120,11 +120,6 @@ def post(
     ] = False,
 ) -> None:
     """Post content. TEXT can be the post text itself, or the path to a text file."""
-    loop = get_event_loop()
-    text = text or editor()
-    if not text:
-        error("No text to post")
-
     password = None
     if cache().exists():
         not_my_ex = style("not-my-ex", bold=True)
@@ -140,6 +135,11 @@ def post(
         auth.invalidate(MASTODON)
     auth.assure_configured()
 
+    text = text or editor()
+    if not text:
+        error("No text to post")
+
+    loop = get_event_loop()
     try:
         loop.run_until_complete(main(auth, text, images, lang, yes_to_all))
     except PostTooLongError as err:
