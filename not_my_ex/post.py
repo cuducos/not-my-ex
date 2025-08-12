@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from pathlib import Path
+from tempfile import NamedTemporaryFile
 from typing import Iterable, Optional
 
 from eld import LanguageDetector  # type: ignore
@@ -7,8 +9,7 @@ from not_my_ex.language import Language
 from not_my_ex.media import Media
 
 
-class PostTooLongError(Exception):
-    pass
+class PostTooLongError(Exception): ...
 
 
 @dataclass
@@ -20,10 +21,13 @@ class Post:
 
     def __post_init__(self):
         if len(self.text) > self.limit:
-            raise PostTooLongError(
-                f"Text cannot be longer than {self.limit} characters. This text is "
-                f"{len(self.text)} characters long."
-            )
+            with NamedTemporaryFile(delete=False) as tmp:
+                Path(tmp.name).write_text(self.text)
+                raise PostTooLongError(
+                    f"Text cannot be longer than {self.limit:,} characters. This text "
+                    f"is {len(self.text):,} characters long. If you need to recover "
+                    f"your draft, it is saved at: {tmp.name}."
+                )
 
         if not self.lang:
             detector = LanguageDetector()
